@@ -63,6 +63,8 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* Footer */}
+          <p className="text-sm text-primary-foreground/50"></p>
         </div>
 
         {/* Decorative Elements */}
