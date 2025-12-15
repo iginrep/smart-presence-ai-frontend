@@ -27,9 +27,9 @@ export function LoginForm() {
       "user",
       JSON.stringify({
         nip,
-        nama: "Dr. Ahmad Wijaya, M.Sc.",
-        jabatan: "Dosen Tetap",
-        fakultas: "Fakultas Teknik",
+        nama: "Yaya Wihardi, M.Kom.",
+        jabatan: "Dosen",
+        fakultas: "Fakultas Pendidikan Matematika dan Ilmu Pengetahuan Alam",
         foto: "/professional-indonesian-man-professor.jpg",
       }),
     )
