@@ -63,8 +63,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Footer */}
-          <p className="text-sm text-primary-foreground/50">Dipercaya oleh 50+ institusi pendidikan di Indonesia</p>
         </div>
 
         {/* Decorative Elements */}
