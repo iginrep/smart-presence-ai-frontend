@@ -5,7 +5,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Fingerprint, LayoutDashboard, Camera, History, LogOut, Menu, X, Bell, ChevronRight, User } from "lucide-react"
+import { Fingerprint, LayoutDashboard, Camera, History, LogOut, Menu, X, Bell, ChevronRight, User, Monitor } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface DashboardLayoutProps {
@@ -21,6 +21,7 @@ interface DashboardLayoutProps {
 
 const navigation = [
   { name: "Dasbor", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Monitor", href: "/monitor", icon: Monitor },
   { name: "Absensi", href: "/absensi", icon: Camera },
   { name: "Riwayat", href: "/riwayat", icon: History },
 ]
