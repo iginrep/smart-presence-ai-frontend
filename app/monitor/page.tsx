@@ -30,16 +30,20 @@ export default function MonitorPage() {
     return null
   }
 
+  // TODO: Configure your backend API base URL here
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+
   return (
     <DashboardLayout user={user}>
       <div className="p-4 sm:p-6 lg:p-8 h-[calc(100vh-2rem)]">
         <CameraDashboard
-          demoMode={true}
-          captureIntervalMs={1000}
+          demoMode={false}
+          apiBaseUrl={API_BASE_URL}
+          captureIntervalMs={2000}
           cameraConfig={{
-            preferFrontCamera: true,
+            preferFrontCamera: false,
             idealWidth: 1280,
-            idealHeight: 720,
+            idealHeight: 740,
           }}
         />
       </div>

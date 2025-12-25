@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { AttendanceHistoryTable } from "@/components/attendance-history-table"
-import { HistoryFilters } from "@/components/history-filters"
-import { HistoryStats } from "@/components/history-stats"
+import { ClassSessionSelector } from "@/components/class-session-selector"
+import { DetectionList, type ClassSession } from "@/components/detection-list"
+import { Card, CardContent } from "@/components/ui/card"
+import { Users, Clock, Activity } from "lucide-react"
 
 interface User {
   nip: string
@@ -18,6 +19,7 @@ interface User {
 export default function RiwayatPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
+  const [selectedSession, setSelectedSession] = useState<ClassSession | null>(null)
 
   useEffect(() => {
     const userData = sessionStorage.getItem("user")
@@ -42,20 +44,60 @@ export default function RiwayatPage() {
             <span>/</span>
             <span className="text-foreground">Riwayat</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Riwayat Absensi</h1>
-          <p className="text-muted-foreground mt-1">Catatan kehadiran dan aktivitas absensi Anda</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Riwayat Deteksi</h1>
+          <p className="text-muted-foreground mt-1">Log deteksi wajah berdasarkan sesi kelas</p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="stagger-children">
-          <HistoryStats />
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <Card className="border-border shadow-sm">
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Total Hari Ini</p>
+                <p className="text-2xl font-bold text-foreground">24</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-border shadow-sm">
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="h-11 w-11 rounded-xl bg-green-500/10 flex items-center justify-center">
+                <Activity className="h-5 w-5 text-green-500" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Sesi Aktif</p>
+                <p className="text-2xl font-bold text-foreground">3</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-border shadow-sm">
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="h-11 w-11 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <Clock className="h-5 w-5 text-blue-500" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Update Terakhir</p>
+                <p className="text-lg font-semibold text-foreground">
+                  {new Date().toLocaleTimeString("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Filters */}
-        <HistoryFilters />
+        {/* Class Session Selector */}
+        <ClassSessionSelector
+          selectedSession={selectedSession}
+          onSessionChange={setSelectedSession}
+        />
 
-        {/* History Table */}
-        <AttendanceHistoryTable />
+        {/* Detection List */}
+        <DetectionList selectedSession={selectedSession} />
       </div>
     </DashboardLayout>
   )
