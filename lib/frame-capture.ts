@@ -24,7 +24,15 @@ export interface FrameCaptureResult {
  * Frame capture configuration
  */
 export interface FrameCaptureConfig {
+  /** Use exact dimensions instead of max dimension scaling */
+  useExactDimensions?: boolean
+  /** Exact width (when useExactDimensions is true) */
+  exactWidth?: number
+  /** Exact height (when useExactDimensions is true) */
+  exactHeight?: number
+  /** Max dimension for proportional scaling */
   maxDimension: number
+  /** JPEG quality (0-1) */
   jpegQuality: number
 }
 
@@ -79,12 +87,24 @@ export function captureFrame(
     return null
   }
 
-  // Calculate proportional dimensions
-  const { width, height } = calculateProportionalDimensions(
-    originalWidth,
-    originalHeight,
-    config.maxDimension
-  )
+  // Determine output dimensions
+  let width: number
+  let height: number
+
+  if (config.useExactDimensions && config.exactWidth && config.exactHeight) {
+    // Use exact dimensions (1280x740 for CCTV processing)
+    width = config.exactWidth
+    height = config.exactHeight
+  } else {
+    // Calculate proportional dimensions
+    const proportional = calculateProportionalDimensions(
+      originalWidth,
+      originalHeight,
+      config.maxDimension
+    )
+    width = proportional.width
+    height = proportional.height
+  }
 
   // Set canvas dimensions
   canvas.width = width

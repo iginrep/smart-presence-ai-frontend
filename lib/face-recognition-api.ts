@@ -5,7 +5,13 @@
  * Handles API communication with the face recognition backend.
  */
 
-import type { FaceRecognitionResponse, FaceDetection } from '@/types/camera'
+import type { 
+  FaceRecognitionResponse, 
+  FaceDetection, 
+  RawApiResponse, 
+  ApiDetectionResult 
+} from '@/types/camera'
+import { getNameById } from '@/lib/user-mapping'
 
 /**
  * API request configuration
@@ -19,9 +25,10 @@ export interface ApiConfig {
 
 /**
  * Default API configuration
+ * TODO: Update baseUrl with your actual backend endpoint
  */
 export const DEFAULT_API_CONFIG: ApiConfig = {
-  baseUrl: '',
+  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
   timeout: 10000,
   retryAttempts: 3,
   retryDelay: 1000,
@@ -39,6 +46,28 @@ export class FaceRecognitionApiError extends Error {
   ) {
     super(message)
     this.name = 'FaceRecognitionApiError'
+  }
+}
+
+/**
+ * Transform raw API response to internal format
+ */
+function transformApiResponse(raw: RawApiResponse): FaceRecognitionResponse {
+  const detections: FaceDetection[] = raw.results.map((result: ApiDetectionResult) => ({
+    user_id: result.user_id,
+    name: getNameById(result.user_id),
+    boundingBox: {
+      x: result.bounding_box.x,
+      y: result.bounding_box.y,
+      width: result.bounding_box.width,
+      height: result.bounding_box.height,
+    },
+    distance: result.distance,
+    confidence: result.distance, // Using distance as confidence
+  }))
+
+  return {
+    detections,
   }
 }
 
@@ -77,8 +106,8 @@ export async function sendFrameForRecognition(
       )
     }
 
-    const data = await response.json()
-    return data as FaceRecognitionResponse
+    const data: RawApiResponse = await response.json()
+    return transformApiResponse(data)
   } catch (error) {
     clearTimeout(timeoutId)
 
@@ -208,28 +237,35 @@ export function createMockResponse(
     return { detections: [] }
   }
 
-  const mockNames = [
-    'Ahmad Fauzi',
-    'Siti Nurhaliza',
-    'Budi Santoso',
-    'Dewi Lestari',
-    'Eko Prasetyo',
+  // Mock user IDs matching our user-mapping database
+  const mockUserIds = [
+    '693ea35da92dbf184b9c7790',
+    '693ea35ca92dbf184b9c778a',
+    '694a6018380de32ee408fedf',
+    '694a601e380de32ee408fef5',
+    '694a6023380de32ee408ff07',
+    null, // Unknown user
   ]
 
   const detectionCount = Math.random() > 0.5 ? 1 : Math.floor(Math.random() * 3) + 1
 
   const detections: FaceDetection[] = Array.from(
     { length: detectionCount },
-    (_, index) => ({
-      name: mockNames[Math.floor(Math.random() * mockNames.length)],
-      boundingBox: {
-        x: 150 + index * 100 + Math.random() * 50,
-        y: 100 + Math.random() * 50,
-        width: 120 + Math.random() * 40,
-        height: 150 + Math.random() * 50,
-      },
-      confidence: 0.85 + Math.random() * 0.14,
-    })
+    (_, index) => {
+      const userId = mockUserIds[Math.floor(Math.random() * mockUserIds.length)]
+      return {
+        user_id: userId,
+        name: getNameById(userId),
+        boundingBox: {
+          x: 150 + index * 150 + Math.random() * 50,
+          y: 100 + Math.random() * 50,
+          width: 120 + Math.random() * 40,
+          height: 150 + Math.random() * 50,
+        },
+        distance: 0.85 + Math.random() * 0.14,
+        confidence: 0.85 + Math.random() * 0.14,
+      }
+    }
   )
 
   return {
