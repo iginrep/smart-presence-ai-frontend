@@ -213,7 +213,7 @@ export const CameraDashboard = memo(function CameraDashboard({
         const newEvents: RecognitionEvent[] = response.detections.map(
           (detection, index) => ({
             id: `${Date.now()}-${index}`,
-            name: detection.name,
+            name: detection.name || 'Tidak Dikenal',
             timestamp: new Date(),
             confidence: detection.confidence,
           })
@@ -264,8 +264,12 @@ export const CameraDashboard = memo(function CameraDashboard({
 
     setProcessingState('capturing')
 
+    // Capture frame at exact 1280x740 resolution for CCTV processing
     const frame = captureFrame(video, canvas, {
-      maxDimension: 800,
+      useExactDimensions: true,
+      exactWidth: 1280,
+      exactHeight: 740,
+      maxDimension: 1280,
       jpegQuality: 0.85,
     })
 
@@ -289,24 +293,6 @@ export const CameraDashboard = memo(function CameraDashboard({
       // Simulate API response in demo mode
       setTimeout(() => {
         const mockResponse = createMockResponse(true)
-        requestQueueRef.current?.setOnResponse((response) => {
-          setProcessingState('complete')
-          setConnectionState('connected')
-          setLastResponseTime(new Date())
-          setDetections(mockResponse.detections)
-
-          if (mockResponse.detections.length > 0) {
-            const newEvents: RecognitionEvent[] = mockResponse.detections.map(
-              (detection, index) => ({
-                id: `${Date.now()}-${index}`,
-                name: detection.name,
-                timestamp: new Date(),
-                confidence: detection.confidence,
-              })
-            )
-            setRecentEvents((prev) => [...newEvents, ...prev].slice(0, 20))
-          }
-        })
 
         setProcessingState('complete')
         setConnectionState('connected')
@@ -318,7 +304,7 @@ export const CameraDashboard = memo(function CameraDashboard({
           const newEvents: RecognitionEvent[] = mockResponse.detections.map(
             (detection, index) => ({
               id: `${Date.now()}-${index}`,
-              name: detection.name,
+              name: detection.name || 'Tidak Dikenal',
               timestamp: new Date(),
               confidence: detection.confidence,
             })

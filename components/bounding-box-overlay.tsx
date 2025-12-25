@@ -50,8 +50,11 @@ const SingleBoundingBox = memo(function SingleBoundingBox({
   mirror,
   displayWidth,
 }: SingleBoundingBoxProps) {
-  const { name, boundingBox, confidence } = detection
+  const { name, user_id, boundingBox, confidence } = detection
   const { x, y, width, height } = boundingBox
+  
+  // Display name or fallback
+  const displayName = name || (user_id ? `User ${user_id.slice(-6)}` : 'Tidak Dikenal')
 
   // Calculate scaled position and size
   const scaledX = x * scaleX
@@ -98,7 +101,7 @@ const SingleBoundingBox = memo(function SingleBoundingBox({
         className={cn(
           'absolute -top-8 left-0',
           'px-2 py-1',
-          'bg-primary/90 text-primary-foreground',
+          user_id ? 'bg-primary/90 text-primary-foreground' : 'bg-muted/90 text-muted-foreground',
           'text-xs font-medium',
           'rounded-md',
           'shadow-sm',
@@ -106,7 +109,7 @@ const SingleBoundingBox = memo(function SingleBoundingBox({
           'max-w-[200px] truncate'
         )}
       >
-        <span>{name}</span>
+        <span>{displayName}</span>
         {confidenceText && (
           <span className="ml-1.5 opacity-80">{confidenceText}</span>
         )}
@@ -164,7 +167,7 @@ export const BoundingBoxOverlay = memo(function BoundingBoxOverlay({
     >
       {detections.map((detection, index) => (
         <SingleBoundingBox
-          key={`${detection.name}-${index}`}
+          key={`${detection.user_id || 'unknown'}-${index}`}
           detection={detection}
           scaleX={scaleFactors.scaleX}
           scaleY={scaleFactors.scaleY}

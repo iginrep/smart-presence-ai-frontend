@@ -22,7 +22,6 @@ interface DashboardLayoutProps {
 const navigation = [
   { name: "Dasbor", href: "/dashboard", icon: LayoutDashboard },
   { name: "Monitor", href: "/monitor", icon: Monitor },
-  { name: "Absensi", href: "/absensi", icon: Camera },
   { name: "Riwayat", href: "/riwayat", icon: History },
 ]
 
