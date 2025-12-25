@@ -18,10 +18,34 @@ export interface BoundingBox {
  * Single face detection result from the AI backend
  */
 export interface FaceDetection {
-  name: string
+  user_id: string | null
+  name?: string
   boundingBox: BoundingBox
+  distance?: number
   confidence?: number
   timestamp?: string
+}
+
+/**
+ * Raw API result from backend
+ */
+export interface ApiDetectionResult {
+  user_id: string | null
+  distance: number
+  bounding_box: {
+    x: number
+    y: number
+    width: number
+    height: number
+  }
+}
+
+/**
+ * Raw API response structure from face recognition endpoint
+ */
+export interface RawApiResponse {
+  status: string
+  results: ApiDetectionResult[]
 }
 
 /**
