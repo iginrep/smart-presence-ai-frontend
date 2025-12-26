@@ -1,14 +1,14 @@
 /**
- * User Mapping Utility
- * SmartPresence AI - Face Recognition System
+ * Utilitas Mapping User
+ * SmartPresence AI - Sistem Pengenalan Wajah
  *
- * Maps user IDs from face recognition API to human-readable names.
- * This is a placeholder implementation - replace with actual API/database lookup.
+ * Memetakan user ID dari API pengenalan wajah ke nama yang mudah dibaca manusia.
+ * Ini implementasi placeholder - ganti dengan lookup API/database sebenarnya.
  */
 
 /**
- * Dummy user database for development/testing
- * TODO: Replace with actual API call to backend user service
+ * Database user dummy untuk pengembangan/pengujian
+ * TODO: Ganti dengan API call ke backend user service
  */
 const userDatabase: Record<string, string> = {
   '693ea35da92dbf184b9c7790': 'Ahmad Fauzi',
@@ -22,11 +22,11 @@ const userDatabase: Record<string, string> = {
 }
 
 /**
- * Get user name by ID
- * Returns a human-readable name for a given user_id
- * 
- * @param userId - The user ID from face recognition API
- * @returns The user's name or 'Unknown' if not found
+ * Ambil nama user berdasarkan ID
+ * Mengembalikan nama yang mudah dibaca untuk user_id tertentu
+ *
+ * @param userId - ID user dari API pengenalan wajah
+ * @returns Nama user atau 'Tidak Dikenal' jika tidak ditemukan
  */
 export function getNameById(userId: string | null): string {
   if (!userId) {
@@ -36,8 +36,8 @@ export function getNameById(userId: string | null): string {
 }
 
 /**
- * Get all known users
- * @returns Array of user objects with id and name
+ * Ambil semua user yang dikenal
+ * @returns Array objek user dengan id dan nama
  */
 export function getAllUsers(): Array<{ id: string; name: string }> {
   return Object.entries(userDatabase).map(([id, name]) => ({
@@ -47,9 +47,9 @@ export function getAllUsers(): Array<{ id: string; name: string }> {
 }
 
 /**
- * Check if a user ID is known in the database
- * @param userId - The user ID to check
- * @returns true if user is known, false otherwise
+ * Cek apakah user ID dikenal di database
+ * @param userId - ID user yang dicek
+ * @returns true jika user dikenal, false jika tidak
  */
 export function isKnownUser(userId: string | null): boolean {
   if (!userId) return false

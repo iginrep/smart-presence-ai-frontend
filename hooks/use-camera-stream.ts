@@ -1,10 +1,12 @@
 /**
- * Camera Stream Hook
- * SmartPresence AI - Enterprise Face Recognition System
+ * Hook Stream Kamera
+ * SmartPresence AI - Sistem Pengenalan Wajah Enterprise
  *
- * Custom hook for managing WebRTC camera stream with proper lifecycle handling.
+ * Custom hook untuk mengelola stream kamera WebRTC dengan penanganan siklus hidup yang benar.
  */
 
+
+// Import React hooks dan tipe kamera
 import { useEffect, useRef, useCallback, useState } from 'react'
 import type {
   CameraState,
@@ -13,8 +15,9 @@ import type {
   DEFAULT_CAMERA_CONFIG,
 } from '@/types/camera'
 
+
 /**
- * Camera stream hook return type
+ * Tipe hasil return dari hook stream kamera
  */
 export interface UseCameraStreamReturn {
   videoRef: React.RefObject<HTMLVideoElement | null>
@@ -27,7 +30,7 @@ export interface UseCameraStreamReturn {
 }
 
 /**
- * Parse camera error to standardized format with Indonesian messages
+ * Parsing error kamera ke format standar dengan pesan Bahasa Indonesia
  */
 function parseCameraError(err: unknown): CameraError {
   if (err instanceof DOMException) {
@@ -79,25 +82,30 @@ function parseCameraError(err: unknown): CameraError {
 }
 
 /**
- * Custom hook for managing camera stream
+ * Custom hook untuk mengelola stream kamera
  */
 export function useCameraStream(
   config: Partial<CameraConfig> = {}
 ): UseCameraStreamReturn {
+
+  // Destrukturisasi konfigurasi kamera (default: kamera depan, resolusi 1280x720)
   const {
     preferFrontCamera = true,
     idealWidth = 1280,
     idealHeight = 720,
   } = config
 
+
+  // Referensi elemen video dan stream kamera
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  // State status kamera, error, dan siap/tidak
   const [cameraState, setCameraState] = useState<CameraState>('idle')
   const [error, setError] = useState<CameraError | null>(null)
   const [isReady, setIsReady] = useState(false)
 
   /**
-   * Stop all tracks and cleanup stream
+   * Menghentikan semua track dan membersihkan stream
    */
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
@@ -118,10 +126,10 @@ export function useCameraStream(
   }, [])
 
   /**
-   * Request camera access and initialize stream
+   * Meminta akses kamera dan inisialisasi stream
    */
   const startCamera = useCallback(async () => {
-    // Check for secure context
+    // Cek apakah context sudah aman (HTTPS/localhost)
     if (!window.isSecureContext) {
       const securityError: CameraError = {
         type: 'permission',
@@ -133,7 +141,7 @@ export function useCameraStream(
       return
     }
 
-    // Check for mediaDevices support
+    // Cek dukungan mediaDevices
     if (!navigator.mediaDevices?.getUserMedia) {
       const supportError: CameraError = {
         type: 'unknown',
@@ -145,14 +153,14 @@ export function useCameraStream(
       return
     }
 
-    // Stop existing stream if any
+    // Hentikan stream lama jika ada
     stopCamera()
 
     try {
       setCameraState('requesting')
       setError(null)
 
-      // Build constraints with front camera preference
+      // Bangun constraints dengan preferensi kamera depan
       const constraints: MediaStreamConstraints = {
         video: {
           facingMode: preferFrontCamera ? 'user' : 'environment',
@@ -168,11 +176,11 @@ export function useCameraStream(
 
       setCameraState('initializing')
 
-      // Attach stream to video element
+      // Pasang stream ke elemen video
       if (videoRef.current) {
         videoRef.current.srcObject = stream
 
-        // Wait for video to be ready
+        // Tunggu video siap
         await new Promise<void>((resolve, reject) => {
           const video = videoRef.current!
           
@@ -192,10 +200,10 @@ export function useCameraStream(
           video.addEventListener('error', handleError)
         })
 
-        // Start playback
+        // Mulai playback video
         await videoRef.current.play()
         
-        // Log video track settings
+        // Log pengaturan track video
         const videoTrack = stream.getVideoTracks()[0]
         if (videoTrack) {
           const settings = videoTrack.getSettings()
@@ -209,10 +217,10 @@ export function useCameraStream(
 
         setIsReady(true)
         setCameraState('active')
-        console.log('[CameraStream] Camera active and ready')
+        console.log('[CameraStream] Kamera aktif dan siap')
       }
     } catch (err) {
-      console.error('[CameraStream] Failed to start camera:', err)
+      console.error('[CameraStream] Gagal memulai kamera:', err)
       const cameraError = parseCameraError(err)
       setError(cameraError)
       setCameraState(cameraError.type === 'permission' ? 'denied' : 'error')
@@ -221,7 +229,7 @@ export function useCameraStream(
   }, [preferFrontCamera, idealWidth, idealHeight, stopCamera])
 
   /**
-   * Cleanup on unmount
+   * Cleanup saat komponen unmount
    */
   useEffect(() => {
     return () => {
@@ -232,6 +240,7 @@ export function useCameraStream(
     }
   }, [])
 
+  // Return API hook ke komponen pemakai
   return {
     videoRef,
     stream: streamRef.current,

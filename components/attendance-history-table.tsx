@@ -1,10 +1,13 @@
+// Mengaktifkan mode client-side rendering (komponen tabel interaktif)
 "use client"
 
+// Import komponen UI dan utilitas
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, Clock, XCircle, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+// Tipe data untuk satu record riwayat absensi
 interface AttendanceRecord {
   id: string
   tanggal: string
@@ -15,6 +18,7 @@ interface AttendanceRecord {
   keterangan?: string
 }
 
+// Data mock untuk menampilkan contoh riwayat absensi (sementara)
 const mockData: AttendanceRecord[] = [
   { id: "1", tanggal: "15 Des 2025", hari: "Senin", masuk: "07:35", keluar: "16:30", status: "hadir" },
   {
@@ -50,6 +54,7 @@ const mockData: AttendanceRecord[] = [
   { id: "8", tanggal: "8 Des 2025", hari: "Senin", masuk: "07:40", keluar: "16:20", status: "hadir" },
 ]
 
+// Konfigurasi label, ikon, dan className untuk tiap status absensi
 const statusConfig = {
   hadir: {
     label: "Hadir",
@@ -75,9 +80,10 @@ const statusConfig = {
 
 export function AttendanceHistoryTable() {
   return (
+    // Card sebagai pembungkus tabel/daftar riwayat absensi
     <Card className="border-border shadow-sm overflow-hidden">
       <CardContent className="p-0">
-        {/* Desktop Table */}
+        {/* Tabel untuk tampilan desktop */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -104,12 +110,15 @@ export function AttendanceHistoryTable() {
             </thead>
             <tbody className="divide-y divide-border">
               {mockData.map((record, index) => {
+                // Ambil konfigurasi status untuk record saat ini
                 const config = statusConfig[record.status]
+                // Simpan komponen ikon agar mudah dirender di JSX
                 const Icon = config.icon
                 return (
                   <tr
                     key={record.id}
                     className={cn(
+                      // Warna hover + zebra striping
                       "transition-colors duration-150 hover:bg-muted/30",
                       index % 2 === 0 ? "bg-card" : "bg-muted/10",
                     )}
@@ -123,6 +132,7 @@ export function AttendanceHistoryTable() {
                     <td className="py-4 px-5">
                       <span
                         className={cn(
+                          // Jika nilai kosong, tampilkan dengan warna muted
                           "text-sm font-medium",
                           record.masuk ? "text-card-foreground" : "text-muted-foreground",
                         )}
@@ -133,6 +143,7 @@ export function AttendanceHistoryTable() {
                     <td className="py-4 px-5">
                       <span
                         className={cn(
+                          // Jika nilai kosong, tampilkan dengan warna muted
                           "text-sm font-medium",
                           record.keluar ? "text-card-foreground" : "text-muted-foreground",
                         )}
@@ -141,6 +152,7 @@ export function AttendanceHistoryTable() {
                       </span>
                     </td>
                     <td className="py-4 px-5">
+                      {/* Badge status dengan warna sesuai status */}
                       <Badge className={cn("font-medium gap-1.5 transition-colors", config.className)}>
                         <Icon className="h-3.5 w-3.5" />
                         {config.label}
@@ -156,10 +168,12 @@ export function AttendanceHistoryTable() {
           </table>
         </div>
 
-        {/* Mobile Stacked Cards */}
+        {/* Kartu bertumpuk untuk tampilan mobile */}
         <div className="md:hidden divide-y divide-border">
           {mockData.map((record) => {
+            // Ambil konfigurasi status untuk record saat ini
             const config = statusConfig[record.status]
+            // Simpan komponen ikon agar mudah dirender di JSX
             const Icon = config.icon
             return (
               <div key={record.id} className="p-4 space-y-3 hover:bg-muted/30 transition-colors">
@@ -173,6 +187,7 @@ export function AttendanceHistoryTable() {
                     {config.label}
                   </Badge>
                 </div>
+                {/* Tampilkan jam masuk/keluar jika ada salah satunya */}
                 {(record.masuk || record.keluar) && (
                   <div className="flex items-center gap-6 text-sm">
                     <div className="flex items-center gap-2">
@@ -185,6 +200,7 @@ export function AttendanceHistoryTable() {
                     </div>
                   </div>
                 )}
+                {/* Tampilkan keterangan jika ada */}
                 {record.keterangan && (
                   <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">{record.keterangan}</p>
                 )}

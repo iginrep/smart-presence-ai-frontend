@@ -1,11 +1,11 @@
 'use client'
 
 /**
- * Bounding Box Overlay Component
- * SmartPresence AI - Enterprise Face Recognition System
+ * Komponen Overlay Bounding Box
+ * SmartPresence AI - Sistem Pengenalan Wajah Enterprise
  *
- * Renders scaled bounding boxes on top of the video feed
- * with name labels and subtle, professional styling.
+ * Merender bounding box yang sudah diskalakan di atas video,
+ * lengkap dengan label nama dan styling yang halus dan profesional.
  */
 
 import { memo, useMemo } from 'react'
@@ -13,27 +13,27 @@ import type { FaceDetection, BoundingBox } from '@/types/camera'
 import { cn } from '@/lib/utils'
 
 /**
- * Bounding box overlay props
+ * Props untuk overlay bounding box
  */
 export interface BoundingBoxOverlayProps {
-  /** Array of face detections with bounding boxes */
+  /** Array deteksi wajah beserta bounding box */
   detections: FaceDetection[]
-  /** Width of the captured frame (before display scaling) */
+  /** Lebar frame hasil capture (sebelum diskalakan ke tampilan) */
   frameWidth: number
-  /** Height of the captured frame (before display scaling) */
+  /** Tinggi frame hasil capture (sebelum diskalakan ke tampilan) */
   frameHeight: number
-  /** Actual displayed width of the video container */
+  /** Lebar aktual tampilan kontainer video */
   displayWidth: number
-  /** Actual displayed height of the video container */
+  /** Tinggi aktual tampilan kontainer video */
   displayHeight: number
-  /** Mirror the overlay (for front camera) */
+  /** Mirror overlay (untuk efek kamera depan) */
   mirror?: boolean
-  /** Additional className */
+  /** className tambahan */
   className?: string
 }
 
 /**
- * Single bounding box component
+ * Komponen bounding box tunggal
  */
 interface SingleBoundingBoxProps {
   detection: FaceDetection
@@ -53,19 +53,19 @@ const SingleBoundingBox = memo(function SingleBoundingBox({
   const { name, user_id, boundingBox, confidence } = detection
   const { x, y, width, height } = boundingBox
   
-  // Display name or fallback
+  // Nama yang ditampilkan (fallback jika tidak ada nama)
   const displayName = name || (user_id ? `User ${user_id.slice(-6)}` : 'Tidak Dikenal')
 
-  // Calculate scaled position and size
+  // Hitung posisi dan ukuran setelah diskalakan ke ukuran tampilan
   const scaledX = x * scaleX
   const scaledY = y * scaleY
   const scaledWidth = width * scaleX
   const scaledHeight = height * scaleY
 
-  // Mirror the x position if needed (for front camera mirror effect)
+  // Mirror posisi X jika diperlukan (efek mirror kamera depan)
   const finalX = mirror ? displayWidth - scaledX - scaledWidth : scaledX
 
-  // Confidence display (if available)
+  // Teks confidence (jika tersedia)
   const confidenceText = confidence
     ? `${Math.round(confidence * 100)}%`
     : null
@@ -80,7 +80,7 @@ const SingleBoundingBox = memo(function SingleBoundingBox({
         height: `${scaledHeight}px`,
       }}
     >
-      {/* Bounding box border */}
+      {/* Border bounding box */}
       <div
         className={cn(
           'absolute inset-0',
@@ -90,13 +90,13 @@ const SingleBoundingBox = memo(function SingleBoundingBox({
         )}
       />
 
-      {/* Corner accents for professional look */}
+      {/* Aksen sudut untuk tampilan lebih profesional */}
       <div className="absolute -top-px -left-px w-3 h-3 border-t-2 border-l-2 border-primary rounded-tl-md" />
       <div className="absolute -top-px -right-px w-3 h-3 border-t-2 border-r-2 border-primary rounded-tr-md" />
       <div className="absolute -bottom-px -left-px w-3 h-3 border-b-2 border-l-2 border-primary rounded-bl-md" />
       <div className="absolute -bottom-px -right-px w-3 h-3 border-b-2 border-r-2 border-primary rounded-br-md" />
 
-      {/* Name label */}
+      {/* Label nama */}
       <div
         className={cn(
           'absolute -top-8 left-0',
@@ -119,11 +119,11 @@ const SingleBoundingBox = memo(function SingleBoundingBox({
 })
 
 /**
- * Bounding Box Overlay Component
+ * Komponen Overlay Bounding Box
  *
- * Renders an absolutely positioned overlay with scaled bounding boxes
- * for each detected face. Handles coordinate transformation from
- * captured frame dimensions to display dimensions.
+ * Merender overlay (posisi absolute) dengan bounding box yang sudah diskalakan
+ * untuk setiap wajah yang terdeteksi. Meng-handle transformasi koordinat dari
+ * dimensi frame capture ke dimensi tampilan.
  */
 export const BoundingBoxOverlay = memo(function BoundingBoxOverlay({
   detections,
@@ -134,7 +134,7 @@ export const BoundingBoxOverlay = memo(function BoundingBoxOverlay({
   mirror = true,
   className,
 }: BoundingBoxOverlayProps) {
-  // Calculate scale factors
+  // Hitung faktor skala untuk mengonversi koordinat frame -> koordinat tampilan
   const scaleFactors = useMemo(() => {
     if (frameWidth === 0 || frameHeight === 0) {
       return { scaleX: 1, scaleY: 1 }
@@ -145,7 +145,7 @@ export const BoundingBoxOverlay = memo(function BoundingBoxOverlay({
     }
   }, [frameWidth, frameHeight, displayWidth, displayHeight])
 
-  // Don't render if no detections or invalid dimensions
+  // Jangan render jika tidak ada deteksi atau dimensi tampilan tidak valid
   if (
     detections.length === 0 ||
     displayWidth === 0 ||
@@ -165,6 +165,7 @@ export const BoundingBoxOverlay = memo(function BoundingBoxOverlay({
         height: `${displayHeight}px`,
       }}
     >
+      {/* Render bounding box untuk setiap deteksi */}
       {detections.map((detection, index) => (
         <SingleBoundingBox
           key={`${detection.user_id || 'unknown'}-${index}`}
@@ -182,7 +183,7 @@ export const BoundingBoxOverlay = memo(function BoundingBoxOverlay({
 BoundingBoxOverlay.displayName = 'BoundingBoxOverlay'
 
 /**
- * No detection overlay - shown when camera is active but no faces detected
+ * Overlay tanpa deteksi - ditampilkan saat kamera aktif tapi tidak ada wajah terdeteksi
  */
 export const NoDetectionOverlay = memo(function NoDetectionOverlay({
   visible,
@@ -191,6 +192,7 @@ export const NoDetectionOverlay = memo(function NoDetectionOverlay({
   visible: boolean
   className?: string
 }) {
+  // Jika tidak visible, jangan render overlay
   if (!visible) return null
 
   return (

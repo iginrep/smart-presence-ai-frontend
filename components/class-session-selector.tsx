@@ -1,12 +1,16 @@
 "use client"
 
+// Import React hook dan komponen UI yang dipakai pada selector.
 import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Calendar, ChevronDown, Clock, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+// Data sesi kelas dan tipe sesi diambil dari komponen/daftar deteksi.
 import { CLASS_SESSIONS, type ClassSession } from "@/components/detection-list"
 
+// Props untuk mengontrol sesi terpilih (state dikelola oleh parent).
 interface ClassSessionSelectorProps {
   selectedSession: ClassSession | null
   onSessionChange: (session: ClassSession | null) => void
@@ -14,33 +18,39 @@ interface ClassSessionSelectorProps {
 }
 
 /**
- * Class Session Selector Component
- * Dropdown to select class sessions for filtering detection history
+ * Komponen Pemilih Sesi Kelas
+ * Dropdown untuk memilih sesi kelas sebagai filter riwayat deteksi.
  */
 export function ClassSessionSelector({
   selectedSession,
   onSessionChange,
   className,
 }: ClassSessionSelectorProps) {
+  // State untuk membuka/menutup dropdown.
   const [isOpen, setIsOpen] = useState(false)
+
+  // Tanggal yang ditampilkan (saat ini diinisialisasi sebagai "hari ini").
   const [selectedDate] = useState(new Date())
 
+  // Handler saat user memilih salah satu sesi dari daftar.
   const handleSelectSession = (session: ClassSession) => {
     onSessionChange(session)
     setIsOpen(false)
   }
 
   return (
+    // Card kontainer utama (mengikuti gaya design system yang ada).
     <Card className={cn("border-border shadow-sm mb-6", className)}>
       <CardContent className="p-4">
         <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-          {/* Date Display */}
+          {/* Tampilan tanggal */}
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center">
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </div>
             <div>
               <p className="text-sm font-medium text-foreground">
+                {/* Format tanggal lokal untuk ditampilkan ke user */}
                 {selectedDate.toLocaleDateString("id-ID", {
                   weekday: "long",
                   day: "numeric",
@@ -51,7 +61,7 @@ export function ClassSessionSelector({
             </div>
           </div>
 
-          {/* Session Selector Dropdown */}
+          {/* Dropdown pemilih sesi */}
           <div className="relative flex-1 lg:max-w-md">
             <div className="flex items-center gap-2 mb-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
@@ -59,6 +69,7 @@ export function ClassSessionSelector({
             </div>
             <Button
               variant="outline"
+              // Toggle buka/tutup dropdown.
               onClick={() => setIsOpen(!isOpen)}
               className={cn(
                 "w-full justify-between bg-card hover:bg-accent text-left",
@@ -66,6 +77,7 @@ export function ClassSessionSelector({
               )}
             >
               <span className="truncate">
+                {/* Menampilkan label sesi terpilih atau placeholder */}
                 {selectedSession?.label || "Pilih sesi kelas..."}
               </span>
               <ChevronDown
@@ -76,17 +88,18 @@ export function ClassSessionSelector({
               />
             </Button>
 
-            {/* Dropdown Menu */}
+            {/* Menu dropdown */}
             {isOpen && (
               <>
-                {/* Backdrop */}
+                {/* Backdrop: area klik di luar menu untuk menutup dropdown */}
                 <div
                   className="fixed inset-0 z-10"
                   onClick={() => setIsOpen(false)}
                 />
-                {/* Menu */}
+                {/* Panel menu */}
                 <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
                   <div className="py-1 max-h-64 overflow-y-auto">
+                    {/* Daftar sesi kelas */}
                     {CLASS_SESSIONS.map((session) => (
                       <button
                         key={session.id}
@@ -105,6 +118,7 @@ export function ClassSessionSelector({
                             {session.startTime} - {session.endTime}
                           </p>
                         </div>
+                        {/* Penanda sesi terpilih */}
                         {selectedSession?.id === session.id && (
                           <Check className="h-4 w-4 text-primary shrink-0" />
                         )}
@@ -116,13 +130,14 @@ export function ClassSessionSelector({
             )}
           </div>
 
-          {/* Quick Session Filters */}
+          {/* Tombol cepat untuk beberapa sesi teratas */}
           <div className="flex items-center gap-2 flex-wrap">
             {CLASS_SESSIONS.slice(0, 3).map((session) => (
               <Button
                 key={session.id}
                 variant="outline"
                 size="sm"
+                // Klik tombol akan memilih sesi, atau membatalkan (toggle) jika sesi yang sama sudah aktif.
                 onClick={() =>
                   onSessionChange(
                     selectedSession?.id === session.id ? null : session

@@ -1,10 +1,10 @@
 'use client'
 
 /**
- * Camera Status Cards
- * SmartPresence AI - Enterprise Face Recognition System
+ * Kartu Status Kamera
+ * SmartPresence AI - Sistem Pengenalan Wajah Enterprise
  *
- * Status cards for the camera dashboard bento grid layout.
+ * Kumpulan kartu status untuk layout bento pada dashboard kamera.
  */
 
 import { memo, useMemo } from 'react'
@@ -44,7 +44,7 @@ import type {
 } from '@/types/camera'
 
 /**
- * Format timestamp to localized time string
+ * Memformat timestamp menjadi string waktu lokal.
  */
 function formatTime(date: Date | null): string {
   if (!date) return '-'
@@ -56,7 +56,7 @@ function formatTime(date: Date | null): string {
 }
 
 /**
- * Format timestamp to relative time
+ * Memformat timestamp menjadi waktu relatif (mis. "2 menit lalu").
  */
 function formatRelativeTime(date: Date | null): string {
   if (!date) return 'Belum ada'
@@ -75,7 +75,7 @@ function formatRelativeTime(date: Date | null): string {
 }
 
 // ============================================
-// System Status Card
+// Kartu Status Sistem
 // ============================================
 
 interface SystemStatusCardProps {
@@ -87,6 +87,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
   status,
   className,
 }: SystemStatusCardProps) {
+  // Konfigurasi tampilan status kamera (ikon, warna teks, dan label) berdasarkan state.
   const cameraStatusConfig = useMemo(() => {
     const configs: Record<
       CameraState,
@@ -126,6 +127,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
     return configs[status.cameraState]
   }, [status.cameraState])
 
+  // Ambil komponen ikon yang sesuai dari konfigurasi.
   const Icon = cameraStatusConfig.icon
 
   return (
@@ -145,7 +147,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
         <CardDescription>Informasi status kamera dan sistem</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Camera Status */}
+        {/* Status kamera */}
         <div className="flex items-center gap-3">
           <div
             className={cn(
@@ -170,20 +172,20 @@ export const SystemStatusCard = memo(function SystemStatusCard({
           </div>
         </div>
 
-        {/* FPS Counter */}
+        {/* Penghitung FPS */}
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-secondary text-muted-foreground">
             <Gauge className="h-4 w-4" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium">Frame Rate</p>
+            <p className="text-sm font-medium">Laju Frame</p>
             <p className="text-xs text-muted-foreground">
               {status.fps > 0 ? `${status.fps.toFixed(1)} FPS` : '-'}
             </p>
           </div>
         </div>
 
-        {/* Frame Count */}
+        {/* Jumlah frame yang diproses */}
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-secondary text-muted-foreground">
             <Activity className="h-4 w-4" />
@@ -196,7 +198,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
           </div>
         </div>
 
-        {/* Last Frame Time */}
+        {/* Waktu frame terakhir diproses */}
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-secondary text-muted-foreground">
             <Timer className="h-4 w-4" />
@@ -216,7 +218,7 @@ export const SystemStatusCard = memo(function SystemStatusCard({
 SystemStatusCard.displayName = 'SystemStatusCard'
 
 // ============================================
-// Connection Status Card
+// Kartu Status Koneksi
 // ============================================
 
 interface ConnectionStatusCardProps {
@@ -232,6 +234,7 @@ export const ConnectionStatusCard = memo(function ConnectionStatusCard({
   latency = null,
   className,
 }: ConnectionStatusCardProps) {
+  // Konfigurasi tampilan status koneksi (ikon, warna, dan label) berdasarkan state.
   const statusConfig = useMemo(() => {
     const configs: Record<
       ConnectionState,
@@ -271,6 +274,7 @@ export const ConnectionStatusCard = memo(function ConnectionStatusCard({
     return configs[state]
   }, [state])
 
+  // Ambil komponen ikon yang sesuai dari konfigurasi.
   const Icon = statusConfig.icon
 
   return (
@@ -297,7 +301,7 @@ export const ConnectionStatusCard = memo(function ConnectionStatusCard({
         <CardDescription>Status koneksi ke server AI</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Connection Status */}
+        {/* Status koneksi */}
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Status</span>
           <Badge
@@ -311,7 +315,7 @@ export const ConnectionStatusCard = memo(function ConnectionStatusCard({
           </Badge>
         </div>
 
-        {/* Latency */}
+        {/* Latensi */}
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Latensi</span>
           <span className="text-sm font-medium">
@@ -319,7 +323,7 @@ export const ConnectionStatusCard = memo(function ConnectionStatusCard({
           </span>
         </div>
 
-        {/* Last Response */}
+        {/* Respons terakhir */}
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Respons Terakhir</span>
           <span className="text-sm font-medium">
@@ -327,9 +331,9 @@ export const ConnectionStatusCard = memo(function ConnectionStatusCard({
           </span>
         </div>
 
-        {/* Endpoint */}
+        {/* Rute endpoint */}
         <div className="pt-2 border-t">
-          <p className="text-xs text-muted-foreground">Endpoint</p>
+          <p className="text-xs text-muted-foreground">Rute</p>
           <p className="text-xs font-mono mt-1 truncate">/api/face-recognition</p>
         </div>
       </CardContent>
@@ -340,7 +344,7 @@ export const ConnectionStatusCard = memo(function ConnectionStatusCard({
 ConnectionStatusCard.displayName = 'ConnectionStatusCard'
 
 // ============================================
-// Recognition Result Card
+// Kartu Hasil Pengenalan
 // ============================================
 
 interface RecognitionResultCardProps {
@@ -354,6 +358,7 @@ export const RecognitionResultCard = memo(function RecognitionResultCard({
   currentDetectionCount,
   className,
 }: RecognitionResultCardProps) {
+  // Event terakhir (paling baru) berada pada indeks 0.
   const lastEvent = recentEvents[0] ?? null
 
   return (
@@ -375,7 +380,7 @@ export const RecognitionResultCard = memo(function RecognitionResultCard({
       <CardContent>
         {lastEvent ? (
           <div className="space-y-4">
-            {/* Last Detection */}
+            {/* Deteksi terakhir */}
             <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
               <div className="p-2 rounded-full bg-primary/10 text-primary">
                 <User className="h-5 w-5" />
@@ -393,7 +398,7 @@ export const RecognitionResultCard = memo(function RecognitionResultCard({
               </div>
             </div>
 
-            {/* Recent Activity */}
+            {/* Aktivitas terbaru */}
             {recentEvents.length > 1 && (
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -436,7 +441,7 @@ export const RecognitionResultCard = memo(function RecognitionResultCard({
 RecognitionResultCard.displayName = 'RecognitionResultCard'
 
 // ============================================
-// Processing Status Card (Compact)
+// Kartu Status Pemrosesan (Ringkas)
 // ============================================
 
 interface ProcessingStatusCardProps {
@@ -448,6 +453,7 @@ export const ProcessingStatusCard = memo(function ProcessingStatusCard({
   state,
   className,
 }: ProcessingStatusCardProps) {
+  // Konfigurasi label dan warna berdasarkan state pemrosesan.
   const statusConfig = useMemo(() => {
     const configs: Record<
       ProcessingState,

@@ -1,12 +1,12 @@
 'use client'
 
 /**
- * Camera Dashboard Component
- * SmartPresence AI - Enterprise Face Recognition System
+ * Komponen Dashboard Kamera
+ * SmartPresence AI - Sistem Pengenalan Wajah Enterprise
  *
- * Main orchestration component that combines camera stream,
- * frame capture, API communication, and status displays
- * in a professional bento grid layout.
+ * Komponen orkestrasi utama yang menggabungkan stream kamera,
+ * capture frame, komunikasi API, dan tampilan status
+ * dalam layout bento grid yang profesional.
  */
 
 import {
@@ -17,17 +17,20 @@ import {
   useMemo,
   memo,
 } from 'react'
+// Komponen terkait kamera dan overlay
 import { CameraStream, type CameraStreamRef } from '@/components/camera-stream'
 import {
   BoundingBoxOverlay,
   NoDetectionOverlay,
 } from '@/components/bounding-box-overlay'
+// Kartu status sistem/koneksi/proses dan hasil pengenalan
 import {
   SystemStatusCard,
   ConnectionStatusCard,
   RecognitionResultCard,
   ProcessingStatusCard,
 } from '@/components/camera-status-cards'
+// Komponen UI dasar
 import {
   Card,
   CardContent,
@@ -36,16 +39,19 @@ import {
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+// Utilitas capture frame
 import {
   captureFrame,
   createCaptureCanvas,
   type FrameCaptureResult,
 } from '@/lib/frame-capture'
+// Klien API pengenalan wajah (dengan antrean request)
 import {
   RequestQueueManager,
   createMockResponse,
   FaceRecognitionApiError,
 } from '@/lib/face-recognition-api'
+// Tipe-tipe domain kamera
 import type {
   CameraState,
   ConnectionState,
@@ -56,6 +62,7 @@ import type {
   CameraConfig,
   DEFAULT_CAMERA_CONFIG,
 } from '@/types/camera'
+// Utilitas untuk menggabungkan className
 import { cn } from '@/lib/utils'
 import {
   Camera,
@@ -68,29 +75,30 @@ import {
 } from 'lucide-react'
 
 /**
- * Camera dashboard props
+ * Props untuk dashboard kamera
  */
 export interface CameraDashboardProps {
-  /** Enable demo mode with mock API responses */
+  /** Aktifkan mode demo dengan respons API palsu (mock) */
   demoMode?: boolean
-  /** Camera configuration overrides */
+  /** Override konfigurasi kamera */
   cameraConfig?: Partial<CameraConfig>
-  /** API base URL */
+  /** Base URL API */
   apiBaseUrl?: string
-  /** Capture interval in milliseconds (default: 1000ms = 1 FPS) */
+  /** Interval capture dalam milidetik (default: 1000ms = 1 FPS) */
   captureIntervalMs?: number
-  /** Additional className */
+  /** className tambahan */
   className?: string
 }
 
 /**
- * Live indicator component
+ * Komponen indikator live
  */
 const LiveIndicator = memo(function LiveIndicator({
   isActive,
 }: {
   isActive: boolean
 }) {
+  // Jika kamera tidak aktif, indikator tidak ditampilkan
   if (!isActive) return null
 
   return (
@@ -100,18 +108,19 @@ const LiveIndicator = memo(function LiveIndicator({
         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
       </span>
       <span className="text-xs font-medium text-red-500 uppercase tracking-wide">
-        Live
+        Langsung
       </span>
     </div>
   )
 })
 
 /**
- * Timestamp display component
+ * Komponen tampilan waktu (timestamp)
  */
 const TimestampDisplay = memo(function TimestampDisplay() {
   const [time, setTime] = useState(new Date())
 
+  // Update waktu setiap detik
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000)
     return () => clearInterval(interval)
@@ -135,14 +144,14 @@ const TimestampDisplay = memo(function TimestampDisplay() {
 })
 
 /**
- * Camera Dashboard Component
+ * Komponen Dashboard Kamera
  *
- * Production-ready camera monitoring dashboard with:
- * - Continuous frame capture at 1 FPS
- * - Real-time face recognition via API
- * - Bounding box overlay
- * - System status monitoring
- * - Professional bento grid layout
+ * Dashboard monitoring kamera siap produksi dengan:
+ * - Capture frame berkelanjutan (mis. 1 FPS)
+ * - Pengenalan wajah real-time via API
+ * - Overlay bounding box
+ * - Monitoring status sistem
+ * - Layout bento grid profesional
  */
 export const CameraDashboard = memo(function CameraDashboard({
   demoMode = false,
@@ -151,7 +160,7 @@ export const CameraDashboard = memo(function CameraDashboard({
   captureIntervalMs = 1000,
   className,
 }: CameraDashboardProps) {
-  // Refs
+  // Refs: menyimpan referensi elemen/objek yang tidak memicu re-render
   const cameraRef = useRef<CameraStreamRef>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -159,7 +168,7 @@ export const CameraDashboard = memo(function CameraDashboard({
   const requestQueueRef = useRef<RequestQueueManager | null>(null)
   const fpsTimestampsRef = useRef<number[]>([])
 
-  // State
+  // State: menyimpan status kamera, koneksi, proses, dan hasil deteksi
   const [cameraState, setCameraState] = useState<CameraState>('idle')
   const [connectionState, setConnectionState] =
     useState<ConnectionState>('disconnected')
@@ -179,7 +188,7 @@ export const CameraDashboard = memo(function CameraDashboard({
     height: 0,
   })
 
-  // Memoized system status
+  // Status sistem yang di-memo untuk mencegah re-render yang tidak perlu
   const systemStatus: SystemStatus = useMemo(
     () => ({
       cameraState,
@@ -193,7 +202,7 @@ export const CameraDashboard = memo(function CameraDashboard({
     [cameraState, connectionState, processingState, lastFrameTime, frameCount, fps]
   )
 
-  // Initialize canvas and request queue
+  // Inisialisasi canvas capture dan request queue untuk komunikasi API
   useEffect(() => {
     canvasRef.current = createCaptureCanvas()
     requestQueueRef.current = new RequestQueueManager({
@@ -201,14 +210,14 @@ export const CameraDashboard = memo(function CameraDashboard({
       timeout: 10000,
     })
 
-    // Set up response handler
+    // Handler ketika respons API berhasil diterima
     requestQueueRef.current.setOnResponse((response) => {
       setProcessingState('complete')
       setConnectionState('connected')
       setLastResponseTime(new Date())
       setDetections(response.detections)
 
-      // Add to recent events
+      // Tambahkan hasil ke daftar event terbaru
       if (response.detections.length > 0) {
         const newEvents: RecognitionEvent[] = response.detections.map(
           (detection, index) => ({
@@ -221,12 +230,13 @@ export const CameraDashboard = memo(function CameraDashboard({
         setRecentEvents((prev) => [...newEvents, ...prev].slice(0, 20))
       }
 
+      // Simpan latency jika disediakan oleh backend
       if (response.processingTime) {
         setLatency(Math.round(response.processingTime))
       }
     })
 
-    // Set up error handler
+    // Handler jika request API gagal
     requestQueueRef.current.setOnError((error) => {
       console.error('[CameraDashboard] API Error:', error.message)
       setProcessingState('error')
@@ -234,11 +244,12 @@ export const CameraDashboard = memo(function CameraDashboard({
     })
 
     return () => {
+      // Bersihkan antrean request saat unmount / baseUrl berubah
       requestQueueRef.current?.clear()
     }
   }, [apiBaseUrl])
 
-  // Calculate FPS
+  // Hitung FPS berdasarkan timestamp capture dalam 1 detik terakhir
   const updateFps = useCallback(() => {
     const now = Date.now()
     const timestamps = fpsTimestampsRef.current
@@ -253,18 +264,19 @@ export const CameraDashboard = memo(function CameraDashboard({
     setFps(timestamps.length)
   }, [])
 
-  // Handle frame capture
+  // Proses capture frame: ambil gambar dari video, update metrik, lalu kirim ke API
   const handleFrameCapture = useCallback(() => {
     const video = cameraRef.current?.videoElement
     const canvas = canvasRef.current
 
+    // Pastikan video/canvas tersedia dan kamera sedang aktif
     if (!video || !canvas || cameraState !== 'active') {
       return
     }
 
     setProcessingState('capturing')
 
-    // Capture frame at exact 1280x740 resolution for CCTV processing
+    // Capture frame pada resolusi 1280x740 (untuk pemrosesan CCTV)
     const frame = captureFrame(video, canvas, {
       useExactDimensions: true,
       exactWidth: 1280,
@@ -278,19 +290,19 @@ export const CameraDashboard = memo(function CameraDashboard({
       return
     }
 
-    // Update frame info
+    // Update informasi frame dan metrik
     setFrameWidth(frame.width)
     setFrameHeight(frame.height)
     setFrameCount((prev) => prev + 1)
     setLastFrameTime(new Date())
     updateFps()
 
-    // Send for recognition
+    // Kirim untuk proses pengenalan
     setProcessingState('sending')
     setConnectionState('connecting')
 
     if (demoMode) {
-      // Simulate API response in demo mode
+      // Simulasikan respons API pada mode demo
       setTimeout(() => {
         const mockResponse = createMockResponse(true)
 
@@ -313,19 +325,20 @@ export const CameraDashboard = memo(function CameraDashboard({
         }
       }, 100 + Math.random() * 200)
     } else {
+      // Enqueue request ke backend (antrian) untuk menghindari overload
       requestQueueRef.current?.enqueue(frame.base64)
     }
   }, [cameraState, demoMode, updateFps])
 
-  // Start capture interval when camera is active
+  // Mulai interval capture saat kamera aktif
   useEffect(() => {
     if (cameraState === 'active') {
-      // Clear existing interval
+      // Hapus interval sebelumnya (jika ada)
       if (captureIntervalRef.current) {
         window.clearInterval(captureIntervalRef.current)
       }
 
-      // Start new interval
+      // Mulai interval baru
       captureIntervalRef.current = window.setInterval(
         handleFrameCapture,
         captureIntervalMs
@@ -335,7 +348,7 @@ export const CameraDashboard = memo(function CameraDashboard({
         `[CameraDashboard] Started capture interval: ${captureIntervalMs}ms`
       )
     } else {
-      // Clear interval when camera is not active
+      // Hapus interval saat kamera tidak aktif
       if (captureIntervalRef.current) {
         window.clearInterval(captureIntervalRef.current)
         captureIntervalRef.current = null
@@ -352,7 +365,7 @@ export const CameraDashboard = memo(function CameraDashboard({
     }
   }, [cameraState, captureIntervalMs, handleFrameCapture])
 
-  // Update display dimensions
+  // Update dimensi tampilan overlay mengikuti ukuran kontainer video
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
@@ -378,7 +391,7 @@ export const CameraDashboard = memo(function CameraDashboard({
     }
   }, [])
 
-  // Handle camera state change
+  // Handler perubahan state kamera dari komponen CameraStream
   const handleCameraStateChange = useCallback((state: CameraState) => {
     setCameraState(state)
     if (state !== 'active') {
@@ -386,12 +399,12 @@ export const CameraDashboard = memo(function CameraDashboard({
     }
   }, [])
 
-  // Start camera
+  // Memulai kamera
   const handleStartCamera = useCallback(() => {
     cameraRef.current?.startCamera()
   }, [])
 
-  // Stop camera
+  // Menghentikan kamera dan reset metrik/hasil
   const handleStopCamera = useCallback(() => {
     cameraRef.current?.stopCamera()
     setDetections([])
@@ -404,7 +417,7 @@ export const CameraDashboard = memo(function CameraDashboard({
 
   return (
     <div className={cn('w-full h-full', className)}>
-      {/* Dashboard Header */}
+      {/* Header dashboard */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -453,9 +466,9 @@ export const CameraDashboard = memo(function CameraDashboard({
         </div>
       </div>
 
-      {/* Bento Grid Layout */}
+      {/* Layout bento grid */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[calc(100%-80px)]">
-        {/* Main Camera Feed - Large Card */}
+        {/* Feed kamera utama - kartu besar */}
         <Card className="lg:col-span-3 lg:row-span-2 overflow-hidden">
           <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
             <div className="flex items-center gap-2">
@@ -471,7 +484,7 @@ export const CameraDashboard = memo(function CameraDashboard({
               ref={containerRef}
               className="relative w-full aspect-video bg-muted overflow-hidden"
             >
-              {/* Camera Stream */}
+              {/* Stream kamera */}
               <CameraStream
                 ref={cameraRef}
                 config={cameraConfig}
@@ -481,7 +494,7 @@ export const CameraDashboard = memo(function CameraDashboard({
                 className="absolute inset-0"
               />
 
-              {/* Bounding Box Overlay */}
+              {/* Overlay bounding box */}
               <BoundingBoxOverlay
                 detections={detections}
                 frameWidth={frameWidth}
@@ -492,7 +505,7 @@ export const CameraDashboard = memo(function CameraDashboard({
                 className="absolute inset-0"
               />
 
-              {/* No Detection Overlay */}
+              {/* Overlay saat tidak ada deteksi */}
               <NoDetectionOverlay
                 visible={
                   cameraState === 'active' &&
@@ -501,7 +514,7 @@ export const CameraDashboard = memo(function CameraDashboard({
                 }
               />
 
-              {/* Camera Info Overlay */}
+              {/* Overlay info kamera (resolusi & FPS) */}
               {cameraState === 'active' && (
                 <div className="absolute top-3 left-3 flex items-center gap-2">
                   <Badge
@@ -523,10 +536,10 @@ export const CameraDashboard = memo(function CameraDashboard({
           </CardContent>
         </Card>
 
-        {/* System Status Card */}
+        {/* Kartu status sistem */}
         <SystemStatusCard status={systemStatus} className="lg:row-span-1" />
 
-        {/* Connection Status Card */}
+        {/* Kartu status koneksi */}
         <ConnectionStatusCard
           state={connectionState}
           lastPingTime={lastResponseTime}
@@ -534,7 +547,7 @@ export const CameraDashboard = memo(function CameraDashboard({
           className="lg:row-span-1"
         />
 
-        {/* Recognition Results - Spans full width on mobile, bottom row on desktop */}
+        {/* Hasil pengenalan - full width di mobile, baris bawah di desktop */}
         <RecognitionResultCard
           recentEvents={recentEvents}
           currentDetectionCount={detections.length}

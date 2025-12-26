@@ -1,15 +1,18 @@
 /**
- * Frame Capture Utility
- * SmartPresence AI - Enterprise Face Recognition System
+ * Utilitas Pengambilan Frame
+ * SmartPresence AI - Sistem Pengenalan Wajah Enterprise
  *
- * Handles canvas-based frame capture from video element,
- * proportional resizing, and Base64 JPEG encoding.
+ * Menangani pengambilan frame berbasis canvas dari elemen video,
+ * resize proporsional, dan encoding JPEG Base64.
  */
 
+
+// Import tipe konfigurasi kamera
 import type { CameraConfig, DEFAULT_CAMERA_CONFIG } from '@/types/camera'
 
+
 /**
- * Result of a frame capture operation
+ * Hasil dari operasi pengambilan frame
  */
 export interface FrameCaptureResult {
   base64: string
@@ -20,28 +23,29 @@ export interface FrameCaptureResult {
   timestamp: number
 }
 
+
 /**
- * Frame capture configuration
+ * Konfigurasi pengambilan frame
  */
 export interface FrameCaptureConfig {
-  /** Use exact dimensions instead of max dimension scaling */
+  /** Gunakan dimensi pasti, bukan scaling max dimension */
   useExactDimensions?: boolean
-  /** Exact width (when useExactDimensions is true) */
+  /** Lebar pasti (jika useExactDimensions true) */
   exactWidth?: number
-  /** Exact height (when useExactDimensions is true) */
+  /** Tinggi pasti (jika useExactDimensions true) */
   exactHeight?: number
-  /** Max dimension for proportional scaling */
+  /** Dimensi maksimum untuk scaling proporsional */
   maxDimension: number
-  /** JPEG quality (0-1) */
+  /** Kualitas JPEG (0-1) */
   jpegQuality: number
 }
 
 /**
- * Calculate proportional dimensions maintaining aspect ratio
- * @param width Original width
- * @param height Original height
- * @param maxDimension Maximum allowed dimension
- * @returns Scaled dimensions
+ * Hitung dimensi proporsional dengan menjaga rasio aspek
+ * @param width Lebar asli
+ * @param height Tinggi asli
+ * @param maxDimension Dimensi maksimum yang diizinkan
+ * @returns Dimensi hasil scaling
  */
 export function calculateProportionalDimensions(
   width: number,
@@ -61,18 +65,18 @@ export function calculateProportionalDimensions(
 }
 
 /**
- * Captures a single frame from a video element
- * @param video HTMLVideoElement to capture from
- * @param canvas HTMLCanvasElement to use for rendering
- * @param config Capture configuration
- * @returns FrameCaptureResult or null if capture failed
+ * Mengambil satu frame dari elemen video
+ * @param video HTMLVideoElement sumber
+ * @param canvas HTMLCanvasElement untuk rendering
+ * @param config Konfigurasi pengambilan
+ * @returns FrameCaptureResult atau null jika gagal
  */
 export function captureFrame(
   video: HTMLVideoElement,
   canvas: HTMLCanvasElement,
   config: FrameCaptureConfig
 ): FrameCaptureResult | null {
-  // Validate video is ready
+  // Validasi video sudah siap
   if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
     console.warn('[FrameCapture] Video not ready for capture')
     return null
@@ -81,22 +85,22 @@ export function captureFrame(
   const originalWidth = video.videoWidth
   const originalHeight = video.videoHeight
 
-  // Validate dimensions
+  // Validasi dimensi video
   if (originalWidth === 0 || originalHeight === 0) {
     console.warn('[FrameCapture] Invalid video dimensions')
     return null
   }
 
-  // Determine output dimensions
+  // Tentukan dimensi output
   let width: number
   let height: number
 
   if (config.useExactDimensions && config.exactWidth && config.exactHeight) {
-    // Use exact dimensions (1280x740 for CCTV processing)
+    // Gunakan dimensi pasti (misal 1280x740 untuk CCTV)
     width = config.exactWidth
     height = config.exactHeight
   } else {
-    // Calculate proportional dimensions
+    // Hitung dimensi proporsional
     const proportional = calculateProportionalDimensions(
       originalWidth,
       originalHeight,
@@ -106,11 +110,11 @@ export function captureFrame(
     height = proportional.height
   }
 
-  // Set canvas dimensions
+  // Set dimensi canvas
   canvas.width = width
   canvas.height = height
 
-  // Get 2D context
+  // Ambil context 2D
   const ctx = canvas.getContext('2d', {
     alpha: false,
     willReadFrequently: false,
@@ -121,13 +125,13 @@ export function captureFrame(
     return null
   }
 
-  // Draw video frame to canvas with scaling
+  // Gambar frame video ke canvas dengan scaling
   ctx.drawImage(video, 0, 0, width, height)
 
-  // Convert to Base64 JPEG
+  // Konversi ke JPEG Base64
   const base64 = canvas.toDataURL('image/jpeg', config.jpegQuality)
 
-  // Remove data URL prefix for cleaner payload
+  // Hapus prefix data URL agar payload lebih ringkas
   const base64Data = base64.replace(/^data:image\/jpeg;base64,/, '')
 
   return {
@@ -141,7 +145,7 @@ export function captureFrame(
 }
 
 /**
- * Creates a hidden canvas element for frame capture
+ * Membuat elemen canvas tersembunyi untuk pengambilan frame
  * @returns HTMLCanvasElement
  */
 export function createCaptureCanvas(): HTMLCanvasElement {
@@ -151,7 +155,7 @@ export function createCaptureCanvas(): HTMLCanvasElement {
 }
 
 /**
- * Frame capture manager class for controlled interval capture
+ * Kelas manajer pengambilan frame untuk interval terkontrol
  */
 export class FrameCaptureManager {
   private video: HTMLVideoElement | null = null
@@ -162,28 +166,31 @@ export class FrameCaptureManager {
   private onFrameCapture: ((frame: FrameCaptureResult) => void) | null = null
   private lastCaptureTime = 0
 
+
   constructor(config: FrameCaptureConfig) {
     this.config = config
     this.canvas = createCaptureCanvas()
   }
 
+
   /**
-   * Initialize the manager with a video element
+   * Inisialisasi manager dengan elemen video
    */
   setVideoElement(video: HTMLVideoElement): void {
     this.video = video
   }
 
+
   /**
-   * Set the frame capture callback
+   * Set callback pengambilan frame
    */
   setOnFrameCapture(callback: (frame: FrameCaptureResult) => void): void {
     this.onFrameCapture = callback
   }
 
   /**
-   * Start capturing frames at the specified interval
-   * @param intervalMs Capture interval in milliseconds
+   * Mulai pengambilan frame dengan interval tertentu
+   * @param intervalMs Interval pengambilan dalam milidetik
    */
   start(intervalMs: number): void {
     if (this.intervalId !== null) {
@@ -205,7 +212,7 @@ export class FrameCaptureManager {
   }
 
   /**
-   * Capture a frame if ready and not already processing
+   * Ambil frame jika siap dan tidak sedang memproses
    */
   private captureIfReady(): void {
     if (!this.isCapturing || !this.video || !this.onFrameCapture) {
@@ -220,7 +227,7 @@ export class FrameCaptureManager {
   }
 
   /**
-   * Stop capturing frames
+   * Hentikan pengambilan frame
    */
   stop(): void {
     if (this.intervalId !== null) {
@@ -232,21 +239,21 @@ export class FrameCaptureManager {
   }
 
   /**
-   * Get the last capture timestamp
+   * Ambil timestamp pengambilan terakhir
    */
   getLastCaptureTime(): number {
     return this.lastCaptureTime
   }
 
   /**
-   * Check if currently capturing
+   * Cek apakah sedang mengambil frame
    */
   getIsCapturing(): boolean {
     return this.isCapturing
   }
 
   /**
-   * Cleanup resources
+   * Bersihkan resource
    */
   dispose(): void {
     this.stop()
@@ -256,12 +263,12 @@ export class FrameCaptureManager {
 }
 
 /**
- * Calculate scale factor between captured frame and displayed video
- * @param capturedWidth Width of the captured/resized frame
- * @param capturedHeight Height of the captured/resized frame
- * @param displayWidth Displayed video width
- * @param displayHeight Displayed video height
- * @returns Scale factors for x and y
+ * Hitung faktor skala antara frame hasil capture dan video yang ditampilkan
+ * @param capturedWidth Lebar frame hasil capture/resize
+ * @param capturedHeight Tinggi frame hasil capture/resize
+ * @param displayWidth Lebar video yang ditampilkan
+ * @param displayHeight Tinggi video yang ditampilkan
+ * @returns Faktor skala x dan y
  */
 export function calculateDisplayScale(
   capturedWidth: number,

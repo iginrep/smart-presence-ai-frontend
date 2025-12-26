@@ -1,10 +1,12 @@
 /**
- * Face Recognition API Client
- * SmartPresence AI - Enterprise Face Recognition System
+ * Klien API Pengenalan Wajah
+ * SmartPresence AI - Sistem Pengenalan Wajah Enterprise
  *
- * Handles API communication with the face recognition backend.
+ * Mengelola komunikasi API dengan backend pengenalan wajah.
  */
 
+
+// Import tipe respons pengenalan wajah dan utilitas mapping user
 import type { 
   FaceRecognitionResponse, 
   FaceDetection, 
@@ -13,8 +15,9 @@ import type {
 } from '@/types/camera'
 import { getNameById } from '@/lib/user-mapping'
 
+
 /**
- * API request configuration
+ * Konfigurasi request API
  */
 export interface ApiConfig {
   baseUrl: string
@@ -23,9 +26,10 @@ export interface ApiConfig {
   retryDelay: number
 }
 
+
 /**
- * Default API configuration
- * TODO: Update baseUrl with your actual backend endpoint
+ * Konfigurasi default API
+ * TODO: Perbarui baseUrl dengan endpoint backend Anda
  */
 export const DEFAULT_API_CONFIG: ApiConfig = {
   baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
@@ -34,8 +38,9 @@ export const DEFAULT_API_CONFIG: ApiConfig = {
   retryDelay: 1000,
 }
 
+
 /**
- * API error with additional context
+ * Error API dengan konteks tambahan
  */
 export class FaceRecognitionApiError extends Error {
   constructor(
@@ -50,7 +55,7 @@ export class FaceRecognitionApiError extends Error {
 }
 
 /**
- * Transform raw API response to internal format
+ * Transformasi respons API mentah ke format internal
  */
 function transformApiResponse(raw: RawApiResponse): FaceRecognitionResponse {
   const detections: FaceDetection[] = raw.results.map((result: ApiDetectionResult) => ({
@@ -72,10 +77,10 @@ function transformApiResponse(raw: RawApiResponse): FaceRecognitionResponse {
 }
 
 /**
- * Send frame for face recognition
- * @param frame Base64 encoded JPEG frame
- * @param config API configuration
- * @returns Face recognition response
+ * Mengirim frame untuk pengenalan wajah
+ * @param frame Frame JPEG yang sudah di-encode Base64
+ * @param config Konfigurasi API
+ * @returns Respons pengenalan wajah
  */
 export async function sendFrameForRecognition(
   frame: string,
@@ -84,6 +89,8 @@ export async function sendFrameForRecognition(
   const { baseUrl, timeout } = { ...DEFAULT_API_CONFIG, ...config }
   const endpoint = `${baseUrl}/api/face-recognition`
 
+
+  // AbortController untuk timeout request
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), timeout)
 
@@ -99,9 +106,10 @@ export async function sendFrameForRecognition(
 
     clearTimeout(timeoutId)
 
+
     if (!response.ok) {
       throw new FaceRecognitionApiError(
-        `API request failed: ${response.statusText}`,
+        `Permintaan API gagal: ${response.statusText}`,
         response.status
       )
     }
@@ -114,6 +122,7 @@ export async function sendFrameForRecognition(
     if (error instanceof FaceRecognitionApiError) {
       throw error
     }
+
 
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
@@ -144,7 +153,7 @@ export async function sendFrameForRecognition(
 }
 
 /**
- * Request queue manager to prevent overlapping requests
+ * Manajer antrian request untuk mencegah request bertumpuk
  */
 export class RequestQueueManager {
   private isProcessing = false
@@ -153,27 +162,30 @@ export class RequestQueueManager {
   private onError: ((error: FaceRecognitionApiError) => void) | null = null
   private config: ApiConfig
 
+
   constructor(config: Partial<ApiConfig> = {}) {
     this.config = { ...DEFAULT_API_CONFIG, ...config }
   }
 
+
   /**
-   * Set response callback
+   * Set callback respons
    */
   setOnResponse(callback: (response: FaceRecognitionResponse) => void): void {
     this.onResponse = callback
   }
 
+
   /**
-   * Set error callback
+   * Set callback error
    */
   setOnError(callback: (error: FaceRecognitionApiError) => void): void {
     this.onError = callback
   }
 
   /**
-   * Queue a frame for processing
-   * If a request is in progress, the frame will be stored and sent after
+   * Masukkan frame ke antrian untuk diproses
+   * Jika ada request yang sedang berjalan, frame akan disimpan dan dikirim setelahnya
    */
   enqueue(frame: string): void {
     if (this.isProcessing) {
@@ -186,7 +198,7 @@ export class RequestQueueManager {
   }
 
   /**
-   * Process a frame
+   * Memproses satu frame
    */
   private async processFrame(frame: string): Promise<void> {
     this.isProcessing = true
@@ -212,15 +224,17 @@ export class RequestQueueManager {
     }
   }
 
+
   /**
-   * Check if currently processing
+   * Cek apakah sedang memproses
    */
   getIsProcessing(): boolean {
     return this.isProcessing
   }
 
+
   /**
-   * Clear pending frames
+   * Hapus frame yang tertunda
    */
   clear(): void {
     this.pendingFrame = null
@@ -228,7 +242,7 @@ export class RequestQueueManager {
 }
 
 /**
- * Create a mock response for development/demo purposes
+ * Membuat respons mock untuk keperluan pengembangan/demo
  */
 export function createMockResponse(
   simulateDetection: boolean = true

@@ -1,15 +1,18 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+
+/* Variasi khusus untuk mode gelap */
 @custom-variant dark (&:is(.dark *));
 
+
 /* ========================================
-   SMARTPRESENCE AI - DESIGN SYSTEM
-   Enterprise-grade design tokens
-   ======================================== */
+  SMARTPRESENCE AI - SISTEM DESAIN
+  Token desain kelas enterprise
+  ======================================== */
 
 :root {
-  /* Core Colors - Refined slate/indigo palette */
+  /* Warna Inti - Palet slate/indigo yang disempurnakan */
   --background: oklch(0.98 0.003 264);
   --foreground: oklch(0.13 0.028 264);
   --card: oklch(1 0 0);
@@ -17,23 +20,23 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.13 0.028 264);
 
-  /* Primary - Deep Indigo */
+  /* Utama - Indigo Tua */
   --primary: oklch(0.42 0.14 264);
   --primary-foreground: oklch(0.99 0 0);
 
-  /* Secondary - Soft Gray */
+  /* Sekunder - Abu-abu Lembut */
   --secondary: oklch(0.97 0.003 264);
   --secondary-foreground: oklch(0.28 0.025 264);
 
-  /* Muted */
+  /* Warna Redup */
   --muted: oklch(0.96 0.004 264);
   --muted-foreground: oklch(0.45 0.02 264);
 
-  /* Accent */
+  /* Warna Aksen */
   --accent: oklch(0.96 0.004 264);
   --accent-foreground: oklch(0.28 0.025 264);
 
-  /* Semantic Colors */
+  /* Warna Semantik */
   --destructive: oklch(0.58 0.18 22);
   --destructive-foreground: oklch(0.99 0 0);
   --success: oklch(0.52 0.14 152);
@@ -41,15 +44,15 @@
   --warning: oklch(0.75 0.14 68);
   --warning-foreground: oklch(0.22 0.02 68);
 
-  /* Borders & Inputs */
+  /* Batas & Input */
   --border: oklch(0.92 0.003 264);
   --input: oklch(0.92 0.003 264);
   --ring: oklch(0.42 0.14 264);
 
-  /* Radius */
+  /* Radius Sudut */
   --radius: 0.875rem;
 
-  /* Charts */
+  /* Warna Grafik */
   --chart-1: oklch(0.42 0.14 264);
   --chart-2: oklch(0.52 0.14 152);
   --chart-3: oklch(0.75 0.14 68);
@@ -66,11 +69,12 @@
   --sidebar-border: oklch(0.94 0.003 264);
   --sidebar-ring: oklch(0.42 0.14 264);
 
-  /* Custom - Elevated surfaces */
+  /* Kustom - Permukaan terangkat */
   --surface-elevated: oklch(1 0 0);
   --surface-sunken: oklch(0.97 0.003 264);
 }
 
+/* Mode gelap */
 .dark {
   --background: oklch(0.12 0.02 264);
   --foreground: oklch(0.97 0.003 264);
@@ -107,6 +111,7 @@
   --surface-sunken: oklch(0.14 0.02 264);
 }
 
+/* Token tema inline */
 @theme inline {
   --font-sans: "Inter", "Inter Fallback", system-ui, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
@@ -155,6 +160,10 @@
   --color-surface-sunken: var(--surface-sunken);
 }
 
+/* ========================================
+   ATURAN DASAR
+   Reset dan gaya dasar
+   ======================================== */
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -165,12 +174,12 @@
 }
 
 /* ========================================
-   ANIMATION UTILITIES
-   Smooth, professional transitions
-   ======================================== */
+  UTILITAS ANIMASI
+  Transisi halus dan profesional
+  ======================================== */
 
 @layer utilities {
-  /* Card hover lift effect */
+  /* Efek hover mengangkat kartu */
   .card-hover {
     @apply transition-all duration-300 ease-out;
   }
@@ -178,7 +187,7 @@
     @apply -translate-y-0.5 shadow-lg shadow-foreground/5;
   }
 
-  /* Subtle scale on hover */
+  /* Efek skala halus saat hover */
   .hover-scale {
     @apply transition-transform duration-200 ease-out;
   }
@@ -186,7 +195,7 @@
     @apply scale-[1.02];
   }
 
-  /* Icon hover rotation */
+  /* Rotasi ikon saat hover */
   .icon-hover {
     @apply transition-transform duration-200 ease-out;
   }
@@ -194,7 +203,7 @@
     @apply rotate-3 scale-110;
   }
 
-  /* Shimmer loading effect */
+  /* Efek shimmer saat loading */
   .shimmer {
     background: linear-gradient(90deg, var(--muted) 0%, var(--background) 50%, var(--muted) 100%);
     background-size: 200% 100%;
@@ -210,7 +219,7 @@
     }
   }
 
-  /* Pulse ring effect */
+  /* Efek cincin berdenyut */
   .pulse-ring {
     @apply relative;
   }
@@ -231,7 +240,7 @@
     }
   }
 
-  /* Fade in animation */
+  /* Animasi fade in (muncul perlahan) */
   .animate-in-fade {
     animation: fade-in 0.4s ease-out forwards;
   }
@@ -247,7 +256,7 @@
     }
   }
 
-  /* Stagger children animation */
+  /* Animasi stagger pada anak grid */
   .stagger-children > * {
     opacity: 0;
     animation: fade-in 0.4s ease-out forwards;
@@ -271,18 +280,18 @@
     animation-delay: 250ms;
   }
 
-  /* Gradient text */
+  /* Teks gradasi */
   .text-gradient {
     @apply bg-clip-text text-transparent;
     background-image: linear-gradient(135deg, var(--primary) 0%, var(--chart-5) 100%);
   }
 
-  /* Glass effect (subtle) */
+  /* Efek kaca (glass) */
   .glass {
     @apply backdrop-blur-xl bg-card/80;
   }
 
-  /* Status indicator pulse */
+  /* Indikator status berdenyut */
   .status-pulse {
     @apply relative;
   }
@@ -304,28 +313,28 @@
 }
 
 /* ========================================
-   COMPONENT OVERRIDES
-   Enhanced default components
-   ======================================== */
+  PENYESUAIAN KOMPONEN
+  Komponen default yang ditingkatkan
+  ======================================== */
 
-/* Better focus states */
+/* State fokus yang lebih baik */
 *:focus-visible {
   @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
 }
 
-/* Smooth scrolling */
+/* Scroll yang halus */
 html {
   scroll-behavior: smooth;
 }
 
-/* Better text rendering */
+/* Rendering teks yang lebih baik */
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-/* Custom scrollbar */
+/* Scrollbar kustom */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

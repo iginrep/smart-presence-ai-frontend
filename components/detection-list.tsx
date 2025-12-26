@@ -1,5 +1,6 @@
 "use client"
 
+// Import React hooks, komponen UI, ikon, util className, dan pemetaan user.
 import { useEffect, useState, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -8,7 +9,7 @@ import { cn } from "@/lib/utils"
 import { getNameById } from "@/lib/user-mapping"
 
 /**
- * Detected person record from the logging system
+ * Record orang yang terdeteksi dari sistem logging.
  */
 export interface DetectedPerson {
   id: string
@@ -19,7 +20,7 @@ export interface DetectedPerson {
 }
 
 /**
- * Class session definition
+ * Definisi sesi kelas.
  */
 export interface ClassSession {
   id: string
@@ -30,54 +31,54 @@ export interface ClassSession {
 }
 
 /**
- * Pre-defined class sessions
+ * Daftar sesi kelas yang sudah didefinisikan.
  */
 export const CLASS_SESSIONS: ClassSession[] = [
   {
     id: "cv",
-    name: "Computer Vision",
+    name: "Visi Komputer",
     startTime: "08:40",
     endTime: "10:20",
-    label: "Computer Vision (08:40 - 10:20)",
+    label: "Visi Komputer (08:40 - 10:20)",
   },
   {
     id: "math",
-    name: "Mathematics",
+    name: "Matematika",
     startTime: "07:00",
     endTime: "08:40",
-    label: "Math (07:00 - 08:40)",
+    label: "Matematika (07:00 - 08:40)",
   },
   {
     id: "ml",
-    name: "Machine Learning",
+    name: "Pembelajaran Mesin",
     startTime: "10:30",
     endTime: "12:10",
-    label: "Machine Learning (10:30 - 12:10)",
+    label: "Pembelajaran Mesin (10:30 - 12:10)",
   },
   {
     id: "ds",
-    name: "Data Structures",
+    name: "Struktur Data",
     startTime: "13:00",
     endTime: "14:40",
-    label: "Data Structures (13:00 - 14:40)",
+    label: "Struktur Data (13:00 - 14:40)",
   },
   {
     id: "algo",
-    name: "Algorithms",
+    name: "Algoritma",
     startTime: "14:50",
     endTime: "16:30",
-    label: "Algorithms (14:50 - 16:30)",
+    label: "Algoritma (14:50 - 16:30)",
   },
 ]
 
 /**
- * API base URL for detection history
- * TODO: Configure your backend API endpoint
+ * Base URL API untuk riwayat deteksi.
+ * TODO: Sesuaikan endpoint backend Anda.
  */
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
 
 /**
- * API response format for detection history
+ * Format respons API untuk riwayat deteksi.
  */
 interface DetectionHistoryResponse {
   status: string
@@ -89,17 +90,20 @@ interface DetectionHistoryResponse {
 }
 
 /**
- * Fetch detected persons for a given session from the backend API
+ * Mengambil daftar orang terdeteksi untuk sesi tertentu dari backend API.
  */
 async function fetchDetectedPersons(
   sessionId: string,
   session: ClassSession,
   date: Date = new Date()
 ): Promise<DetectedPerson[]> {
+  // Format tanggal YYYY-MM-DD sesuai kebutuhan backend.
   const dateStr = date.toISOString().split('T')[0]
+  // Endpoint POST untuk mengambil riwayat deteksi.
   const endpoint = `${API_BASE_URL}/api/detection-history`
   
   try {
+    // Kirim parameter waktu sesi ke backend.
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
@@ -113,12 +117,15 @@ async function fetchDetectedPersons(
       }),
     })
 
+    // Jika respons bukan 2xx, anggap gagal dan lempar error.
     if (!response.ok) {
       throw new Error(`API request failed: ${response.statusText}`)
     }
 
+    // Parse JSON sesuai kontrak respons.
     const data: DetectionHistoryResponse = await response.json()
     
+    // Ubah hasil API menjadi struktur `DetectedPerson` yang dipakai UI.
     return data.results.map((result, index) => ({
       id: `${sessionId}-${index}-${Date.now()}`,
       user_id: result.user_id,
@@ -127,6 +134,7 @@ async function fetchDetectedPersons(
       confidence: result.distance,
     }))
   } catch (error) {
+    // Log error untuk debugging, lalu lempar lagi agar caller bisa menanganinya.
     console.error('[DetectionList] API Error:', error)
     throw error
   }
@@ -138,47 +146,55 @@ interface DetectionListProps {
 }
 
 /**
- * Detection List Component
- * Displays a simple list of detected persons for a given class session
+ * Komponen Daftar Deteksi
+ * Menampilkan daftar sederhana orang yang terdeteksi pada sesi kelas tertentu.
  */
 export function DetectionList({ selectedSession, className }: DetectionListProps) {
+  // State data hasil deteksi.
   const [detectedPersons, setDetectedPersons] = useState<DetectedPerson[]>([])
+  // State loading untuk menonaktifkan tombol refresh dan menampilkan indikator.
   const [isLoading, setIsLoading] = useState(false)
+  // Menyimpan waktu update terakhir.
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  // Toggle auto-refresh.
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true)
 
-  // Fetch data function
+  // Fungsi pengambil data (dipakai manual refresh dan auto-refresh).
   const fetchData = useCallback(async () => {
+    // Jika belum ada sesi dipilih, kosongkan data dan hentikan.
     if (!selectedSession) {
       setDetectedPersons([])
       return
     }
 
+    // Mulai loading.
     setIsLoading(true)
     try {
+      // Ambil data dari backend untuk sesi terpilih.
       const data = await fetchDetectedPersons(selectedSession.id, selectedSession)
       setDetectedPersons(data)
       setLastUpdated(new Date())
     } catch (error) {
       console.error("Failed to fetch detected persons:", error)
-      // Keep existing data on error, just log it
+      // Jika gagal, pertahankan data lama (hanya log error).
     } finally {
+      // Akhiri loading apapun hasilnya.
       setIsLoading(false)
     }
   }, [selectedSession])
 
-  // Fetch data when session changes
+  // Ambil data setiap kali sesi berubah.
   useEffect(() => {
     fetchData()
   }, [fetchData])
 
-  // Auto-refresh every 5 minutes
+  // Auto-refresh tiap 5 menit saat diaktifkan dan sesi sudah dipilih.
   useEffect(() => {
     if (!autoRefreshEnabled || !selectedSession) return
 
     const interval = setInterval(() => {
       fetchData()
-    }, 5 * 60 * 1000) // 5 minutes
+    }, 5 * 60 * 1000) // 5 menit
 
     return () => clearInterval(interval)
   }, [autoRefreshEnabled, selectedSession, fetchData])
@@ -204,6 +220,7 @@ export function DetectionList({ selectedSession, className }: DetectionListProps
                 Update: {lastUpdated.toLocaleTimeString("id-ID")}
               </span>
             )}
+            {/* Tombol refresh manual */}
             <button
               onClick={fetchData}
               disabled={isLoading}
@@ -218,6 +235,7 @@ export function DetectionList({ selectedSession, className }: DetectionListProps
         </div>
       </CardHeader>
       <CardContent>
+        {/* Kondisi tampilan berdasarkan sesi terpilih + status loading + ketersediaan data */}
         {!selectedSession ? (
           <div className="text-center py-8 text-muted-foreground">
             <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
@@ -234,6 +252,7 @@ export function DetectionList({ selectedSession, className }: DetectionListProps
             <p className="text-sm">Belum ada yang terdeteksi</p>
           </div>
         ) : (
+          // Daftar hasil deteksi.
           <div className="space-y-2">
             {detectedPersons.map((person, index) => (
               <div
@@ -245,6 +264,7 @@ export function DetectionList({ selectedSession, className }: DetectionListProps
                 )}
               >
                 <div className="flex items-center gap-3">
+                  {/* Nomor urut */}
                   <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary font-medium text-sm">
                     {index + 1}
                   </div>
@@ -252,6 +272,7 @@ export function DetectionList({ selectedSession, className }: DetectionListProps
                     <p className="text-sm font-medium text-foreground">
                       {person.name}
                     </p>
+                    {/* Waktu deteksi */}
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Clock className="h-3 w-3" />
                       {person.detectedAt.toLocaleTimeString("id-ID", {
@@ -261,6 +282,7 @@ export function DetectionList({ selectedSession, className }: DetectionListProps
                     </div>
                   </div>
                 </div>
+                {/* Badge confidence (jika tersedia) */}
                 {person.confidence && (
                   <Badge
                     variant="outline"
@@ -279,7 +301,7 @@ export function DetectionList({ selectedSession, className }: DetectionListProps
           </div>
         )}
 
-        {/* Auto-refresh indicator */}
+        {/* Indikator + kontrol auto-refresh */}
         {selectedSession && (
           <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between">
             <span className="text-xs text-muted-foreground">

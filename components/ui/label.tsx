@@ -1,15 +1,21 @@
+// Mengaktifkan mode client-side rendering (komponen ini memakai Radix UI client)
 'use client'
 
+// Import React untuk typing dan utilitas komponen
 import * as React from 'react'
+// Import komponen Label dari Radix UI
 import * as LabelPrimitive from '@radix-ui/react-label'
 
+// Utilitas untuk menggabungkan className (Tailwind) secara aman
 import { cn } from '@/lib/utils'
 
+// Komponen Label: wrapper untuk LabelPrimitive.Root dengan styling konsisten
 function Label({
   className,
   ...props
 }: React.ComponentProps<typeof LabelPrimitive.Root>) {
   return (
+    // Render label dengan className default + className tambahan dari props
     <LabelPrimitive.Root
       data-slot="label"
       className={cn(
@@ -21,4 +27,5 @@ function Label({
   )
 }
 
+// Ekspor komponen Label
 export { Label }

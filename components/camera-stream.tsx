@@ -1,13 +1,14 @@
 'use client'
 
 /**
- * Camera Stream Component
- * SmartPresence AI - Enterprise Face Recognition System
+ * Komponen Stream Kamera
+ * SmartPresence AI - Sistem Pengenalan Wajah Enterprise
  *
- * Renders the video element with camera stream and handles
- * all camera lifecycle management.
+ * Merender elemen video untuk menampilkan stream kamera dan menangani
+ * seluruh siklus hidup kamera (start/stop, state, dan error).
  */
 
+// Import React utilities untuk forwardRef + lifecycle, hook kamera, tipe, util className, dan ikon.
 import { forwardRef, useImperativeHandle, useEffect, memo } from 'react'
 import { useCameraStream } from '@/hooks/use-camera-stream'
 import type { CameraConfig, CameraState, CameraError } from '@/types/camera'
@@ -15,38 +16,44 @@ import { cn } from '@/lib/utils'
 import { Camera, CameraOff, AlertCircle, Loader2 } from 'lucide-react'
 
 /**
- * Camera stream component props
+ * Props untuk komponen stream kamera.
  */
 export interface CameraStreamProps {
-  /** Camera configuration */
+  /** Konfigurasi kamera (opsional; dipasangkan ke hook `useCameraStream`). */
   config?: Partial<CameraConfig>
-  /** Auto-start camera on mount */
+  /** Jika `true`, kamera otomatis dimulai saat komponen di-mount. */
   autoStart?: boolean
-  /** Callback when camera state changes */
+  /** Callback ketika state kamera berubah. */
   onStateChange?: (state: CameraState) => void
-  /** Callback when error occurs */
+  /** Callback ketika terjadi error. */
   onError?: (error: CameraError) => void
-  /** Callback when camera is ready */
+  /** Callback ketika kamera siap digunakan (stream sudah siap). */
   onReady?: () => void
-  /** Additional className for container */
+  /** `className` tambahan untuk kontainer luar. */
   className?: string
-  /** Mirror the video (for front camera) */
+  /** Membalik video secara horizontal (umumnya untuk kamera depan). */
   mirror?: boolean
 }
 
 /**
- * Ref handle for external control
+ * Handle ref untuk kontrol eksternal (parent bisa start/stop kamera).
  */
 export interface CameraStreamRef {
+  // Referensi elemen video yang sedang dipakai untuk stream.
   videoElement: HTMLVideoElement | null
+  // Memulai kamera (async karena meminta izin dan membuka stream).
   startCamera: () => Promise<void>
+  // Menghentikan kamera dan melepas stream.
   stopCamera: () => void
+  // Menandakan stream kamera sudah siap.
   isReady: boolean
+  // State kamera saat ini.
   cameraState: CameraState
 }
 
 /**
- * Camera state indicator component
+ * Komponen indikator state kamera.
+ * Ditampilkan sebagai overlay ketika kamera belum aktif / sedang meminta izin / error.
  */
 const CameraStateIndicator = memo(function CameraStateIndicator({
   state,
@@ -55,6 +62,7 @@ const CameraStateIndicator = memo(function CameraStateIndicator({
   state: CameraState
   error: CameraError | null
 }) {
+  // Konfigurasi UI per state: ikon, teks, background, dan apakah ikon perlu animasi.
   const stateConfig: Record<
     CameraState,
     {
@@ -99,8 +107,10 @@ const CameraStateIndicator = memo(function CameraStateIndicator({
   }
 
   const config = stateConfig[state]
+  // Ambil ikon yang sesuai dari konfigurasi.
   const Icon = config.icon
 
+  // Jika state sudah aktif, overlay tidak perlu ditampilkan.
   if (state === 'active') return null
 
   return (
@@ -137,10 +147,10 @@ const CameraStateIndicator = memo(function CameraStateIndicator({
 })
 
 /**
- * Camera Stream Component
+ * Komponen Stream Kamera
  *
- * Renders a video element with camera stream and provides
- * comprehensive state management and callbacks.
+ * Menyediakan elemen `<video>` untuk stream kamera, serta state management
+ * dan callback untuk integrasi dengan parent.
  */
 export const CameraStream = memo(
   forwardRef<CameraStreamRef, CameraStreamProps>(function CameraStream(
@@ -155,6 +165,7 @@ export const CameraStream = memo(
     },
     ref
   ) {
+    // Inisialisasi pengelolaan kamera melalui hook terpusat.
     const {
       videoRef,
       cameraState,
@@ -164,7 +175,7 @@ export const CameraStream = memo(
       isReady,
     } = useCameraStream(config)
 
-    // Expose ref methods
+    // Mengekspos method dan state melalui `ref` agar parent dapat mengontrol kamera.
     useImperativeHandle(
       ref,
       () => ({
@@ -177,7 +188,8 @@ export const CameraStream = memo(
       [startCamera, stopCamera, isReady, cameraState]
     )
 
-    // Auto-start camera on mount
+    // Otomatis memulai kamera saat komponen di-mount (jika `autoStart` aktif),
+    // serta memastikan kamera berhenti saat unmount.
     useEffect(() => {
       if (autoStart) {
         startCamera()
@@ -188,19 +200,19 @@ export const CameraStream = memo(
       }
     }, [autoStart, startCamera, stopCamera])
 
-    // State change callback
+    // Mengabarkan perubahan state kamera ke parent.
     useEffect(() => {
       onStateChange?.(cameraState)
     }, [cameraState, onStateChange])
 
-    // Error callback
+    // Mengabarkan error kamera ke parent ketika error tersedia.
     useEffect(() => {
       if (error) {
         onError?.(error)
       }
     }, [error, onError])
 
-    // Ready callback
+    // Mengabarkan kondisi "siap" ke parent saat stream sudah ready.
     useEffect(() => {
       if (isReady) {
         onReady?.()
@@ -214,7 +226,7 @@ export const CameraStream = memo(
           className
         )}
       >
-        {/* Video element */}
+          {/* Elemen video untuk menampilkan stream kamera */}
         <video
           ref={videoRef}
           autoPlay
@@ -222,12 +234,14 @@ export const CameraStream = memo(
           muted
           className={cn(
             'w-full h-full object-cover',
+              // Jika `mirror` aktif, tampilkan video mirrored (umumnya untuk kamera depan).
             mirror && 'scale-x-[-1]',
+              // Sembunyikan video saat kamera belum aktif agar overlay terlihat jelas.
             cameraState !== 'active' && 'opacity-0'
           )}
         />
 
-        {/* State overlay */}
+          {/* Overlay status kamera (idle/requesting/initializing/error/denied) */}
         <CameraStateIndicator state={cameraState} error={error} />
       </div>
     )

@@ -1,16 +1,23 @@
+
+// Import komponen UI Card, ikon, dan utilitas className
 import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle2, LogOut, ArrowUpRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+
+// Komponen kartu aktivitas terakhir (recent activity)
 export function RecentActivityCard() {
+  // Data aktivitas mock: masuk dan keluar
   const activities = [
     { type: "in", time: "07:45", date: "Kemarin", icon: CheckCircle2 },
     { type: "out", time: "16:30", date: "Kemarin", icon: LogOut },
   ]
 
   return (
+    // Card utama untuk menampilkan aktivitas terakhir user
     <Card className="h-full border-border shadow-sm card-hover">
       <CardContent className="p-5 h-full flex flex-col">
+        {/* Header judul dan tombol lihat semua */}
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Aktivitas Terakhir</p>
           <button className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors">
@@ -19,6 +26,7 @@ export function RecentActivityCard() {
           </button>
         </div>
 
+        {/* Daftar aktivitas (masuk/keluar) */}
         <div className="flex-1 flex flex-col justify-center space-y-3">
           {activities.map((activity, index) => (
             <div
@@ -28,6 +36,7 @@ export function RecentActivityCard() {
                 index !== activities.length - 1 && "pb-3 border-b border-border",
               )}
             >
+              {/* Ikon status aktivitas */}
               <div
                 className={cn(
                   "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-colors",
@@ -40,6 +49,7 @@ export function RecentActivityCard() {
                   className={cn("h-4 w-4", activity.type === "in" ? "text-success" : "text-muted-foreground")}
                 />
               </div>
+              {/* Info aktivitas: label dan waktu */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-card-foreground">
                   {activity.type === "in" ? "Masuk" : "Keluar"}
