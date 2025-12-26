@@ -1,9 +1,13 @@
+// Import React untuk typing dan utilitas komponen
 import * as React from 'react'
 
+// Utilitas untuk menggabungkan className (Tailwind) secara aman
 import { cn } from '@/lib/utils'
 
+// Komponen Card: kontainer dasar untuk menampilkan panel/kartu
 function Card({ className, ...props }: React.ComponentProps<'div'>) {
   return (
+    // Elemen div utama card dengan styling default + className tambahan
     <div
       data-slot="card"
       className={cn(
@@ -15,6 +19,7 @@ function Card({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
+// Bagian header pada Card (judul, deskripsi, action)
 function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -28,6 +33,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
+// Judul pada Card
 function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -38,6 +44,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
+// Deskripsi/teks pendukung pada Card
 function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -48,6 +55,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
+// Area action (mis. tombol) yang biasanya di pojok kanan header
 function CardAction({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -61,6 +69,7 @@ function CardAction({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
+// Konten utama Card
 function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -71,6 +80,7 @@ function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
+// Bagian footer pada Card
 function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -81,6 +91,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
+// Ekspor semua bagian Card agar bisa dipakai ulang
 export {
   Card,
   CardHeader,

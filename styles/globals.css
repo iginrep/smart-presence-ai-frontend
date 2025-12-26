@@ -1,8 +1,17 @@
+
+/* Import Tailwind CSS dan plugin animasi */
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+
+/* Custom variant untuk mode gelap */
 @custom-variant dark (&:is(.dark *));
 
+
+/*
+  Variabel CSS global untuk tema terang (light mode)
+  Berisi warna-warna utama, latar belakang, border, dan lain-lain
+*/
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -39,6 +48,11 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+
+/*
+  Variabel CSS untuk mode gelap (dark mode)
+  Mengatur warna-warna utama, latar belakang, border, dsb. untuk tampilan gelap
+*/
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -74,6 +88,11 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
+
+/*
+  Tema inline untuk font dan warna-warna utama
+  Menghubungkan variabel font dan warna ke variabel CSS global
+*/
 @theme inline {
   --font-sans: 'Geist', 'Geist Fallback';
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
@@ -115,6 +134,11 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+
+/*
+  Layer dasar (base) untuk styling global
+  Mengatur border dan outline untuk semua elemen, serta background dan warna teks untuk body
+*/
 @layer base {
   * {
     @apply border-border outline-ring/50;

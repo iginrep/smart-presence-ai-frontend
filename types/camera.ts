@@ -1,11 +1,12 @@
+
 /**
- * Camera Dashboard Type Definitions
- * SmartPresence AI - Enterprise Face Recognition System
+ * Definisi Tipe untuk Dashboard Kamera
+ * SmartPresence AI - Sistem Pengenalan Wajah Enterprise
  */
 
 /**
- * Bounding box coordinates for detected faces
- * Coordinates are relative to the original frame dimensions
+ * Koordinat bounding box untuk wajah yang terdeteksi
+ * Koordinat relatif terhadap dimensi frame asli
  */
 export interface BoundingBox {
   x: number
@@ -15,7 +16,7 @@ export interface BoundingBox {
 }
 
 /**
- * Single face detection result from the AI backend
+ * Hasil deteksi satu wajah dari backend AI
  */
 export interface FaceDetection {
   user_id: string | null
@@ -27,7 +28,7 @@ export interface FaceDetection {
 }
 
 /**
- * Raw API result from backend
+ * Hasil mentah API dari backend
  */
 export interface ApiDetectionResult {
   user_id: string | null
@@ -41,7 +42,7 @@ export interface ApiDetectionResult {
 }
 
 /**
- * Raw API response structure from face recognition endpoint
+ * Struktur respons API mentah dari endpoint pengenalan wajah
  */
 export interface RawApiResponse {
   status: string
@@ -49,7 +50,7 @@ export interface RawApiResponse {
 }
 
 /**
- * API response structure from face recognition endpoint
+ * Struktur respons API dari endpoint pengenalan wajah
  */
 export interface FaceRecognitionResponse {
   detections: FaceDetection[]
@@ -58,39 +59,39 @@ export interface FaceRecognitionResponse {
 }
 
 /**
- * Camera initialization states
+ * Status inisialisasi kamera
  */
 export type CameraState =
-  | 'idle'
-  | 'requesting'
-  | 'initializing'
-  | 'active'
-  | 'error'
-  | 'denied'
+  | 'idle'         // Kamera belum aktif
+  | 'requesting'   // Meminta izin kamera
+  | 'initializing' // Proses inisialisasi kamera
+  | 'active'       // Kamera aktif
+  | 'error'        // Terjadi error pada kamera
+  | 'denied'       // Izin kamera ditolak
 
 /**
- * API connection states
+ * Status koneksi API
  */
 export type ConnectionState =
-  | 'disconnected'
-  | 'connecting'
-  | 'connected'
-  | 'error'
-  | 'reconnecting'
+  | 'disconnected'   // Tidak terhubung
+  | 'connecting'     // Sedang menghubungkan
+  | 'connected'      // Terhubung
+  | 'error'          // Koneksi error
+  | 'reconnecting'   // Mencoba menghubungkan ulang
 
 /**
- * Frame capture and processing states
+ * Status pengambilan dan pemrosesan frame
  */
 export type ProcessingState =
-  | 'idle'
-  | 'capturing'
-  | 'sending'
-  | 'processing'
-  | 'complete'
-  | 'error'
+  | 'idle'        // Menunggu
+  | 'capturing'   // Mengambil frame
+  | 'sending'     // Mengirim frame ke server
+  | 'processing'  // Memproses pengenalan wajah
+  | 'complete'    // Proses selesai
+  | 'error'       // Gagal memproses
 
 /**
- * Camera error types with Indonesian messages
+ * Tipe error kamera beserta pesan dalam Bahasa Indonesia
  */
 export interface CameraError {
   type: 'permission' | 'not_found' | 'not_readable' | 'overconstrained' | 'unknown'
@@ -99,7 +100,7 @@ export interface CameraError {
 }
 
 /**
- * System status information
+ * Informasi status sistem
  */
 export interface SystemStatus {
   cameraState: CameraState
@@ -112,7 +113,7 @@ export interface SystemStatus {
 }
 
 /**
- * Recognition event for activity logging
+ * Event pengenalan wajah untuk pencatatan aktivitas
  */
 export interface RecognitionEvent {
   id: string
@@ -122,25 +123,25 @@ export interface RecognitionEvent {
 }
 
 /**
- * Camera configuration options
+ * Opsi konfigurasi kamera
  */
 export interface CameraConfig {
-  /** Target frames per second for capture */
+  /** Target frame per detik untuk pengambilan gambar */
   targetFps: number
-  /** Maximum dimension for frame resize */
+  /** Dimensi maksimum untuk resize frame */
   maxDimension: number
-  /** JPEG quality for frame encoding (0-1) */
+  /** Kualitas JPEG untuk encoding frame (0-1) */
   jpegQuality: number
-  /** Prefer front camera */
+  /** Preferensi kamera depan */
   preferFrontCamera: boolean
-  /** Ideal video width */
+  /** Lebar video ideal */
   idealWidth: number
-  /** Ideal video height */
+  /** Tinggi video ideal */
   idealHeight: number
 }
 
 /**
- * Default camera configuration
+ * Konfigurasi default kamera
  */
 export const DEFAULT_CAMERA_CONFIG: CameraConfig = {
   targetFps: 1,
@@ -152,7 +153,7 @@ export const DEFAULT_CAMERA_CONFIG: CameraConfig = {
 }
 
 /**
- * Indonesian messages for camera states
+ * Pesan status kamera dalam Bahasa Indonesia
  */
 export const CAMERA_STATE_MESSAGES: Record<CameraState, string> = {
   idle: 'Kamera belum aktif',
@@ -164,7 +165,7 @@ export const CAMERA_STATE_MESSAGES: Record<CameraState, string> = {
 }
 
 /**
- * Indonesian messages for connection states
+ * Pesan status koneksi dalam Bahasa Indonesia
  */
 export const CONNECTION_STATE_MESSAGES: Record<ConnectionState, string> = {
   disconnected: 'Tidak terhubung',
@@ -175,7 +176,7 @@ export const CONNECTION_STATE_MESSAGES: Record<ConnectionState, string> = {
 }
 
 /**
- * Indonesian messages for processing states
+ * Pesan status pemrosesan dalam Bahasa Indonesia
  */
 export const PROCESSING_STATE_MESSAGES: Record<ProcessingState, string> = {
   idle: 'Menunggu',
@@ -187,7 +188,7 @@ export const PROCESSING_STATE_MESSAGES: Record<ProcessingState, string> = {
 }
 
 /**
- * Indonesian error messages for camera errors
+ * Pesan error kamera dalam Bahasa Indonesia
  */
 export const CAMERA_ERROR_MESSAGES: Record<CameraError['type'], string> = {
   permission: 'Izin akses kamera ditolak. Silakan aktifkan izin kamera di pengaturan browser.',

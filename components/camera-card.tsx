@@ -1,18 +1,23 @@
+// Mengaktifkan mode client-side rendering (menggunakan Web API kamera)
 "use client"
 
+// Import React hooks, komponen UI, ikon, dan utilitas className
 import { useEffect, useRef, useState, useCallback } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Camera, CameraOff, AlertCircle, CheckCircle2, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
+// Status proses absensi pada modul kamera
 export type AttendanceStatus = "idle" | "processing" | "success" | "error"
 
+// Tipe pesan panduan untuk membantu pengguna memposisikan wajah
 export type FaceGuidance = {
   message: string
   type: "success" | "info" | "warning" | "error"
 }
 
+// Props untuk komponen CameraCard
 interface CameraCardProps {
   status: AttendanceStatus
   onGuidanceChange: (guidance: FaceGuidance) => void
@@ -20,16 +25,24 @@ interface CameraCardProps {
 }
 
 export function CameraCard({ status, onGuidanceChange, onCanSubmitChange }: CameraCardProps) {
+  // Referensi elemen video untuk menampilkan stream kamera
   const videoRef = useRef<HTMLVideoElement>(null)
+  // Referensi canvas untuk menggambar overlay panduan (ellipse dan marker)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  // State untuk menandai kamera aktif/tidak
   const [cameraActive, setCameraActive] = useState(false)
+  // State untuk menyimpan pesan error kamera (jika gagal akses)
   const [cameraError, setCameraError] = useState<string | null>(null)
+  // State untuk menandai apakah wajah sudah "valid" menurut simulasi
   const [faceDetected, setFaceDetected] = useState(false)
+  // Menyimpan id requestAnimationFrame agar bisa dibatalkan saat cleanup
   const animationRef = useRef<number | null>(null)
 
+  // Simulasi analisis wajah: mengubah guidance dan menentukan apakah valid untuk submit
   const analyzeFace = useCallback(() => {
     if (!cameraActive || status === "success" || status === "processing") return
 
+    // Daftar skenario panduan (mock) dan apakah kondisi dianggap valid
     const scenarios: { guidance: FaceGuidance; valid: boolean }[] = [
       { guidance: { message: "Wajah terdeteksi dengan baik", type: "success" }, valid: true },
       { guidance: { message: "Posisikan wajah di tengah bingkai", type: "info" }, valid: false },
@@ -53,17 +66,20 @@ export function CameraCard({ status, onGuidanceChange, onCanSubmitChange }: Came
       scenario = scenarios[4]
     }
 
+    // Update state dan informasikan ke parent apakah pengguna bisa submit
     setFaceDetected(scenario.valid)
     onGuidanceChange(scenario.guidance)
     onCanSubmitChange(scenario.valid)
   }, [cameraActive, status, onGuidanceChange, onCanSubmitChange])
 
+  // Jalankan analisis wajah berkala selama kamera aktif
   useEffect(() => {
     if (!cameraActive) return
     const interval = setInterval(analyzeFace, 2000)
     return () => clearInterval(interval)
   }, [cameraActive, analyzeFace])
 
+  // Memulai kamera dan menampilkan stream pada elemen <video>
   async function startCamera() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -74,6 +90,7 @@ export function CameraCard({ status, onGuidanceChange, onCanSubmitChange }: Came
         },
       })
 
+      // Pasang stream ke video dan mulai playback
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         await videoRef.current.play()
@@ -86,18 +103,21 @@ export function CameraCard({ status, onGuidanceChange, onCanSubmitChange }: Came
     }
   }
 
+  // Menghentikan kamera dan membersihkan stream
   function stopCamera() {
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
       tracks.forEach((track) => track.stop())
       videoRef.current.srcObject = null
     }
+    // Reset state terkait kamera dan validasi
     setCameraActive(false)
     setFaceDetected(false)
     onCanSubmitChange(false)
     onGuidanceChange({ message: "Posisikan wajah Anda di tengah bingkai", type: "info" })
   }
 
+  // Cleanup saat komponen unmount: batalkan animasi dan pastikan kamera berhenti
   useEffect(() => {
     return () => {
       if (animationRef.current) {
@@ -108,6 +128,7 @@ export function CameraCard({ status, onGuidanceChange, onCanSubmitChange }: Came
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Gambar overlay panduan pada canvas selama kamera aktif
   useEffect(() => {
     if (!cameraActive || !canvasRef.current || !videoRef.current) return
 
@@ -115,6 +136,7 @@ export function CameraCard({ status, onGuidanceChange, onCanSubmitChange }: Came
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
+    // Loop menggambar overlay (ellipse + marker sudut) menggunakan requestAnimationFrame
     function draw() {
       if (!canvas || !ctx || !videoRef.current) return
 
@@ -128,6 +150,7 @@ export function CameraCard({ status, onGuidanceChange, onCanSubmitChange }: Came
       const radiusX = canvas.width * 0.22
       const radiusY = canvas.height * 0.32
 
+      // Gambar ellipse panduan posisi wajah
       ctx.beginPath()
       ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI)
       ctx.strokeStyle = faceDetected ? "rgba(34, 197, 94, 0.9)" : "rgba(148, 163, 184, 0.5)"
@@ -135,6 +158,7 @@ export function CameraCard({ status, onGuidanceChange, onCanSubmitChange }: Came
       ctx.setLineDash(faceDetected ? [] : [8, 8])
       ctx.stroke()
 
+      // Tambahkan glow saat wajah terdeteksi
       if (faceDetected) {
         ctx.shadowColor = "rgba(34, 197, 94, 0.5)"
         ctx.shadowBlur = 20
@@ -155,6 +179,7 @@ export function CameraCard({ status, onGuidanceChange, onCanSubmitChange }: Came
       ctx.lineCap = "round"
       ctx.strokeStyle = faceDetected ? "rgba(34, 197, 94, 1)" : "rgba(99, 102, 241, 0.8)"
 
+      // Gambar marker sudut sebagai panduan framing
       corners.forEach((corner, i) => {
         ctx.beginPath()
         if (i < 2) {
@@ -182,18 +207,21 @@ export function CameraCard({ status, onGuidanceChange, onCanSubmitChange }: Came
   }, [cameraActive, faceDetected])
 
   return (
+    // Card utama untuk tampilan kamera dan overlay
     <Card className="h-full border-border shadow-sm overflow-hidden">
       <CardContent className="p-0">
         <div className="relative aspect-[4/3] bg-foreground/5">
           {cameraActive ? (
             <>
+              {/* Video stream kamera */}
               <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted />
+              {/* Canvas overlay panduan */}
               <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
 
-              {/* Top gradient overlay */}
+              {/* Overlay gradasi bagian atas */}
               <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-foreground/30 to-transparent pointer-events-none" />
 
-              {/* Status badge */}
+              {/* Badge status deteksi wajah */}
               <div className="absolute top-4 left-4 flex items-center gap-2">
                 <div
                   className={cn(
@@ -219,15 +247,15 @@ export function CameraCard({ status, onGuidanceChange, onCanSubmitChange }: Came
                 </div>
               </div>
 
-              {/* AI badge */}
+              {/* Badge AI */}
               <div className="absolute top-4 right-4">
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/90 text-primary-foreground text-xs font-medium backdrop-blur-md">
                   <Sparkles className="h-3 w-3" />
-                  AI Active
+                  AI Aktif
                 </div>
               </div>
 
-              {/* Success Overlay */}
+              {/* Overlay sukses */}
               {status === "success" && (
                 <div className="absolute inset-0 bg-success/20 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
                   <div className="bg-card rounded-2xl p-8 text-center shadow-2xl max-w-sm mx-4 animate-in zoom-in-95 duration-300">
@@ -243,7 +271,7 @@ export function CameraCard({ status, onGuidanceChange, onCanSubmitChange }: Came
                 </div>
               )}
 
-              {/* Processing Overlay */}
+              {/* Overlay saat memproses */}
               {status === "processing" && (
                 <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200">
                   <div className="text-center">
@@ -255,6 +283,7 @@ export function CameraCard({ status, onGuidanceChange, onCanSubmitChange }: Came
               )}
             </>
           ) : (
+            // Tampilan saat kamera tidak aktif / terjadi error
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
               {cameraError ? (
                 <>
@@ -286,7 +315,7 @@ export function CameraCard({ status, onGuidanceChange, onCanSubmitChange }: Came
           )}
         </div>
 
-        {/* Camera Controls */}
+        {/* Kontrol kamera */}
         {cameraActive && status !== "success" && (
           <div className="p-4 border-t border-border bg-card/50">
             <div className="flex items-center justify-between">

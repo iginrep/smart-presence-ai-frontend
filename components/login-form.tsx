@@ -1,5 +1,6 @@
 "use client"
 
+// Import tipe React, hook state, router Next.js, komponen UI, ikon, dan util className.
 import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -10,19 +11,34 @@ import { Loader2, Eye, EyeOff, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function LoginForm() {
+  // Router untuk navigasi setelah login.
   const router = useRouter()
+
+  // State untuk menampilkan status loading saat submit.
   const [isLoading, setIsLoading] = useState(false)
+
+  // State nilai input NIP/NIK.
   const [nip, setNip] = useState("")
+
+  // State nilai input password.
   const [password, setPassword] = useState("")
+
+  // Toggle untuk menampilkan/menyembunyikan password.
   const [showPassword, setShowPassword] = useState(false)
+
+  // Menyimpan field yang sedang fokus untuk styling label.
   const [focused, setFocused] = useState<string | null>(null)
 
+  // Handler submit form login.
   async function handleSubmit(e: React.FormEvent) {
+    // Mencegah refresh halaman.
     e.preventDefault()
     setIsLoading(true)
 
+    // Simulasi proses login (delay) — placeholder.
     await new Promise((resolve) => setTimeout(resolve, 1500))
 
+    // Simpan data user ke sessionStorage (mock) agar halaman lain dapat membaca session.
     sessionStorage.setItem(
       "user",
       JSON.stringify({
@@ -34,12 +50,14 @@ export function LoginForm() {
       }),
     )
 
+    // Arahkan ke dashboard setelah login.
     router.push("/dashboard")
   }
 
   return (
+    // Form login (menggunakan onSubmit agar tombol enter juga bekerja).
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* NIP Field */}
+      {/* Field NIP/NIK */}
       <div className="space-y-2">
         <Label
           htmlFor="nip"
@@ -57,6 +75,7 @@ export function LoginForm() {
             placeholder="Masukkan NIP atau NIK"
             value={nip}
             onChange={(e) => setNip(e.target.value)}
+            // Simpan state fokus untuk mengubah warna label.
             onFocus={() => setFocused("nip")}
             onBlur={() => setFocused(null)}
             required
@@ -65,7 +84,7 @@ export function LoginForm() {
         </div>
       </div>
 
-      {/* Password Field */}
+      {/* Field kata sandi */}
       <div className="space-y-2">
         <Label
           htmlFor="password"
@@ -79,15 +98,18 @@ export function LoginForm() {
         <div className="relative">
           <Input
             id="password"
+            // Ubah tipe input berdasarkan toggle `showPassword`.
             type={showPassword ? "text" : "password"}
             placeholder="Masukkan kata sandi"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            // Simpan state fokus untuk mengubah warna label.
             onFocus={() => setFocused("password")}
             onBlur={() => setFocused(null)}
             required
             className="h-12 bg-background pr-12 transition-all duration-200 focus:bg-card"
           />
+          {/* Tombol untuk menampilkan/menyembunyikan password */}
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
@@ -98,10 +120,11 @@ export function LoginForm() {
         </div>
       </div>
 
-      {/* Submit Button */}
+      {/* Tombol submit */}
       <Button
         type="submit"
         className="w-full h-12 font-medium group transition-all duration-300"
+        // Nonaktifkan tombol saat loading atau input masih kosong.
         disabled={isLoading || !nip || !password}
       >
         {isLoading ? (
@@ -117,7 +140,7 @@ export function LoginForm() {
         )}
       </Button>
 
-      {/* Forgot Password */}
+      {/* Tombol lupa kata sandi (UI saja) */}
       <div className="text-center">
         <button
           type="button"

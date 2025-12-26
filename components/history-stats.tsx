@@ -1,8 +1,11 @@
+// Import komponen Card untuk tampilan statistik, ikon, dan util className.
 import { Card, CardContent } from "@/components/ui/card"
 import { CalendarCheck, Clock, AlertTriangle, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function HistoryStats() {
+  // Data statistik yang akan dirender sebagai kartu-kartu ringkas.
+  // Catatan: data di sini bersifat statis (placeholder) sesuai desain UI.
   const stats = [
     {
       label: "Total Kehadiran",
@@ -43,11 +46,14 @@ export function HistoryStats() {
   ]
 
   return (
+    // Grid kartu statistik (2 kolom di mobile, 4 kolom di desktop).
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      {/* Render setiap statistik menjadi sebuah Card */}
       {stats.map((stat) => (
         <Card key={stat.label} className="border-border shadow-sm card-hover group">
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-start justify-between mb-3">
+              {/* Ikon utama statistik */}
               <div
                 className={cn(
                   "h-11 w-11 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110",
@@ -56,6 +62,7 @@ export function HistoryStats() {
               >
                 <stat.icon className={cn("h-5 w-5", stat.iconColor)} />
               </div>
+              {/* Indikator tren (naik/turun) */}
               <div
                 className={cn(
                   "flex items-center gap-0.5 text-xs font-medium px-2 py-1 rounded-full",
@@ -67,8 +74,10 @@ export function HistoryStats() {
               </div>
             </div>
             <div>
+              {/* Label statistik */}
               <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
               <div className="flex items-baseline gap-1.5">
+                {/* Nilai utama + subteks */}
                 <p className="text-2xl font-bold text-card-foreground">{stat.value}</p>
                 <p className="text-xs text-muted-foreground">{stat.subtext}</p>
               </div>
