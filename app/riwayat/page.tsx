@@ -1,5 +1,8 @@
+
+// Mengaktifkan mode client-side rendering
 "use client"
 
+// Import React hooks dan komponen yang dibutuhkan
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { DashboardLayout } from "@/components/dashboard-layout"
@@ -8,6 +11,7 @@ import { DetectionList, type ClassSession } from "@/components/detection-list"
 import { Card, CardContent } from "@/components/ui/card"
 import { Users, Clock, Activity } from "lucide-react"
 
+// Tipe data untuk user
 interface User {
   nip: string
   nama: string
@@ -16,28 +20,33 @@ interface User {
   foto: string
 }
 
+// Komponen utama halaman riwayat deteksi
 export default function RiwayatPage() {
-  const router = useRouter()
-  const [user, setUser] = useState<User | null>(null)
-  const [selectedSession, setSelectedSession] = useState<ClassSession | null>(null)
+  const router = useRouter() // Hook untuk navigasi
+  const [user, setUser] = useState<User | null>(null) // State untuk data user
+  const [selectedSession, setSelectedSession] = useState<ClassSession | null>(null) // State untuk sesi kelas yang dipilih
 
+  // Ambil data user dari sessionStorage saat komponen mount
   useEffect(() => {
     const userData = sessionStorage.getItem("user")
     if (!userData) {
+      // Jika user belum login, redirect ke halaman login
       router.push("/login")
       return
     }
-    setUser(JSON.parse(userData))
+    setUser(JSON.parse(userData)) // Set data user ke state
   }, [router])
 
+  // Jika user belum tersedia, jangan render apapun
   if (!user) {
     return null
   }
 
+  // Render layout dashboard riwayat deteksi
   return (
     <DashboardLayout user={user}>
       <div className="p-4 sm:p-6 lg:p-8">
-        {/* Page Header */}
+        {/* Header halaman riwayat */}
         <div className="mb-6 lg:mb-8 animate-in-fade">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
             <span>Dasbor</span>
@@ -48,8 +57,9 @@ export default function RiwayatPage() {
           <p className="text-muted-foreground mt-1">Log deteksi wajah berdasarkan sesi kelas</p>
         </div>
 
-        {/* Quick Stats */}
+        {/* Statistik ringkas */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          {/* Total deteksi hari ini */}
           <Card className="border-border shadow-sm">
             <CardContent className="p-4 flex items-center gap-4">
               <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -61,6 +71,7 @@ export default function RiwayatPage() {
               </div>
             </CardContent>
           </Card>
+          {/* Jumlah sesi aktif */}
           <Card className="border-border shadow-sm">
             <CardContent className="p-4 flex items-center gap-4">
               <div className="h-11 w-11 rounded-xl bg-green-500/10 flex items-center justify-center">
@@ -72,6 +83,7 @@ export default function RiwayatPage() {
               </div>
             </CardContent>
           </Card>
+          {/* Waktu update terakhir */}
           <Card className="border-border shadow-sm">
             <CardContent className="p-4 flex items-center gap-4">
               <div className="h-11 w-11 rounded-xl bg-blue-500/10 flex items-center justify-center">
@@ -90,13 +102,13 @@ export default function RiwayatPage() {
           </Card>
         </div>
 
-        {/* Class Session Selector */}
+        {/* Selector sesi kelas */}
         <ClassSessionSelector
           selectedSession={selectedSession}
           onSessionChange={setSelectedSession}
         />
 
-        {/* Detection List */}
+        {/* Daftar deteksi wajah */}
         <DetectionList selectedSession={selectedSession} />
       </div>
     </DashboardLayout>

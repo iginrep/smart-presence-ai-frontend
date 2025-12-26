@@ -5,7 +5,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Camera, CameraOff, AlertCircle, CheckCircle2, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import type { AttendanceStatus, FaceGuidance } from "@/app/absensi/page"
+
+export type AttendanceStatus = "idle" | "processing" | "success" | "error"
+
+export type FaceGuidance = {
+  message: string
+  type: "success" | "info" | "warning" | "error"
+}
 
 interface CameraCardProps {
   status: AttendanceStatus
