@@ -36,6 +36,43 @@ export function getNameById(userId: string | null): string {
 }
 
 /**
+ * Ambil nama berdasarkan user_id atau visitor_id
+ * - Jika user_id ada: panggil getUserName untuk mendapatkan nama
+ * - Jika visitor_id ada: tampilkan "Tamu"
+ * - Jika keduanya tidak ada: tampilkan "Tidak Dikenal"
+ *
+ * @param userId - ID user dari API (opsional)
+ * @param visitorId - ID visitor dari API (opsional)
+ * @returns Nama yang sesuai
+ */
+export function getDisplayName(
+  userId?: string | null,
+  visitorId?: string | null
+): string {
+  // Prioritas: user_id dulu, lalu visitor_id
+  if (userId) {
+    return getNameById(userId)
+  }
+
+  if (visitorId) {
+    return 'Tamu'
+  }
+
+  return 'Tidak Dikenal'
+}
+
+/**
+ * Fungsi dummy getUserName - alias untuk getNameById
+ * Digunakan untuk mendapatkan nama user berdasarkan ID
+ *
+ * @param id - ID user
+ * @returns Nama user
+ */
+export function getUserName(id: string): string {
+  return getNameById(id)
+}
+
+/**
  * Ambil semua user yang dikenal
  * @returns Array objek user dengan id dan nama
  */

@@ -13,7 +13,7 @@ import type {
   RawApiResponse, 
   ApiDetectionResult 
 } from '@/types/camera'
-import { getNameById } from '@/lib/user-mapping'
+import { getDisplayName } from '@/lib/user-mapping'
 
 
 /**
@@ -24,6 +24,7 @@ export interface ApiConfig {
   timeout: number
   retryAttempts: number
   retryDelay: number
+  classId: string
 }
 
 
@@ -36,6 +37,7 @@ export const DEFAULT_API_CONFIG: ApiConfig = {
   timeout: 10000,
   retryAttempts: 3,
   retryDelay: 1000,
+  classId: process.env.NEXT_PUBLIC_CLASS_ID || 'class_id_placeholder',
 }
 
 
@@ -56,11 +58,13 @@ export class FaceRecognitionApiError extends Error {
 
 /**
  * Transformasi respons API mentah ke format internal
+ * Mendukung user_id dan visitor_id untuk penamaan
  */
 function transformApiResponse(raw: RawApiResponse): FaceRecognitionResponse {
   const detections: FaceDetection[] = raw.results.map((result: ApiDetectionResult) => ({
-    user_id: result.user_id,
-    name: getNameById(result.user_id),
+    user_id: result.user_id || null,
+    visitor_id: result.visitor_id || null,
+    name: getDisplayName(result.user_id, result.visitor_id),
     boundingBox: {
       x: result.bounding_box.x,
       y: result.bounding_box.y,
@@ -77,7 +81,7 @@ function transformApiResponse(raw: RawApiResponse): FaceRecognitionResponse {
 }
 
 /**
- * Mengirim frame untuk pengenalan wajah
+ * Mengirim frame untuk pengenalan wajah ke endpoint /face/uploadmany
  * @param frame Frame JPEG yang sudah di-encode Base64
  * @param config Konfigurasi API
  * @returns Respons pengenalan wajah
@@ -86,8 +90,8 @@ export async function sendFrameForRecognition(
   frame: string,
   config: Partial<ApiConfig> = {}
 ): Promise<FaceRecognitionResponse> {
-  const { baseUrl, timeout } = { ...DEFAULT_API_CONFIG, ...config }
-  const endpoint = `${baseUrl}/api/face-recognition`
+  const { baseUrl, timeout, classId } = { ...DEFAULT_API_CONFIG, ...config }
+  const endpoint = `${baseUrl}/face/uploadmany`
 
 
   // AbortController untuk timeout request
@@ -100,7 +104,10 @@ export async function sendFrameForRecognition(
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ frame }),
+      body: JSON.stringify({
+        image_base64: frame,
+        class_id: classId,
+      }),
       signal: controller.signal,
     })
 
@@ -243,6 +250,7 @@ export class RequestQueueManager {
 
 /**
  * Membuat respons mock untuk keperluan pengembangan/demo
+ * Mendukung user_id dan visitor_id
  */
 export function createMockResponse(
   simulateDetection: boolean = true
@@ -251,14 +259,16 @@ export function createMockResponse(
     return { detections: [] }
   }
 
-  // Mock user IDs matching our user-mapping database
-  const mockUserIds = [
-    '693ea35da92dbf184b9c7790',
-    '693ea35ca92dbf184b9c778a',
-    '694a6018380de32ee408fedf',
-    '694a601e380de32ee408fef5',
-    '694a6023380de32ee408ff07',
-    null, // Unknown user
+  // Mock data - bisa user_id atau visitor_id
+  const mockData: Array<{ user_id: string | null; visitor_id: string | null }> = [
+    { user_id: '693ea35da92dbf184b9c7790', visitor_id: null },
+    { user_id: '693ea35ca92dbf184b9c778a', visitor_id: null },
+    { user_id: '694a6018380de32ee408fedf', visitor_id: null },
+    { user_id: '694a601e380de32ee408fef5', visitor_id: null },
+    { user_id: '694a6023380de32ee408ff07', visitor_id: null },
+    { user_id: null, visitor_id: 'visitor_001' }, // Visitor/Tamu
+    { user_id: null, visitor_id: 'visitor_002' }, // Visitor/Tamu
+    { user_id: null, visitor_id: null }, // Tidak dikenal
   ]
 
   const detectionCount = Math.random() > 0.5 ? 1 : Math.floor(Math.random() * 3) + 1
@@ -266,10 +276,11 @@ export function createMockResponse(
   const detections: FaceDetection[] = Array.from(
     { length: detectionCount },
     (_, index) => {
-      const userId = mockUserIds[Math.floor(Math.random() * mockUserIds.length)]
+      const data = mockData[Math.floor(Math.random() * mockData.length)]
       return {
-        user_id: userId,
-        name: getNameById(userId),
+        user_id: data.user_id,
+        visitor_id: data.visitor_id,
+        name: getDisplayName(data.user_id, data.visitor_id),
         boundingBox: {
           x: 150 + index * 150 + Math.random() * 50,
           y: 100 + Math.random() * 50,

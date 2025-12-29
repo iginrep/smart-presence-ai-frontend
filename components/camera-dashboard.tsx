@@ -276,11 +276,11 @@ export const CameraDashboard = memo(function CameraDashboard({
 
     setProcessingState('capturing')
 
-    // Capture frame pada resolusi 1280x740 (untuk pemrosesan CCTV)
+    // Capture frame pada resolusi 1280x720 (untuk pemrosesan CCTV)
     const frame = captureFrame(video, canvas, {
       useExactDimensions: true,
       exactWidth: 1280,
-      exactHeight: 740,
+      exactHeight: 720,
       maxDimension: 1280,
       jpegQuality: 0.85,
     })
