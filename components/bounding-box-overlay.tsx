@@ -50,11 +50,18 @@ const SingleBoundingBox = memo(function SingleBoundingBox({
   mirror,
   displayWidth,
 }: SingleBoundingBoxProps) {
-  const { name, user_id, boundingBox, confidence } = detection
+  const { name, user_id, visitor_id, boundingBox, confidence } = detection
   const { x, y, width, height } = boundingBox
   
-  // Nama yang ditampilkan (fallback jika tidak ada nama)
-  const displayName = name || (user_id ? `User ${user_id.slice(-6)}` : 'Tidak Dikenal')
+  // Tentukan nama yang ditampilkan berdasarkan logika:
+  // - Jika ada user_id: gunakan name (yang sudah di-resolve dari getUserName)
+  // - Jika ada visitor_id: tampilkan "Tamu"
+  // - Jika keduanya tidak ada: tampilkan "Tidak Dikenal"
+  const displayName = name || (visitor_id ? 'Tamu' : (user_id ? `User ${user_id.slice(-6)}` : 'Tidak Dikenal'))
+  
+  // Tentukan apakah ini user yang dikenal, tamu, atau tidak dikenal
+  const isKnownUser = !!user_id
+  const isVisitor = !!visitor_id && !user_id
 
   // Hitung posisi dan ukuran setelah diskalakan ke ukuran tampilan
   const scaledX = x * scaleX
@@ -80,33 +87,48 @@ const SingleBoundingBox = memo(function SingleBoundingBox({
         height: `${scaledHeight}px`,
       }}
     >
-      {/* Border bounding box */}
+      {/* Border bounding box - warna berbeda berdasarkan tipe */}
       <div
         className={cn(
           'absolute inset-0',
-          'border-2 border-primary/60',
-          'rounded-md',
-          'shadow-sm'
+          'border-2 rounded-md shadow-sm',
+          isKnownUser ? 'border-primary/60' : isVisitor ? 'border-amber-500/60' : 'border-muted-foreground/60'
         )}
       />
 
       {/* Aksen sudut untuk tampilan lebih profesional */}
-      <div className="absolute -top-px -left-px w-3 h-3 border-t-2 border-l-2 border-primary rounded-tl-md" />
-      <div className="absolute -top-px -right-px w-3 h-3 border-t-2 border-r-2 border-primary rounded-tr-md" />
-      <div className="absolute -bottom-px -left-px w-3 h-3 border-b-2 border-l-2 border-primary rounded-bl-md" />
-      <div className="absolute -bottom-px -right-px w-3 h-3 border-b-2 border-r-2 border-primary rounded-br-md" />
+      <div className={cn(
+        'absolute -top-px -left-px w-3 h-3 border-t-2 border-l-2 rounded-tl-md',
+        isKnownUser ? 'border-primary' : isVisitor ? 'border-amber-500' : 'border-muted-foreground'
+      )} />
+      <div className={cn(
+        'absolute -top-px -right-px w-3 h-3 border-t-2 border-r-2 rounded-tr-md',
+        isKnownUser ? 'border-primary' : isVisitor ? 'border-amber-500' : 'border-muted-foreground'
+      )} />
+      <div className={cn(
+        'absolute -bottom-px -left-px w-3 h-3 border-b-2 border-l-2 rounded-bl-md',
+        isKnownUser ? 'border-primary' : isVisitor ? 'border-amber-500' : 'border-muted-foreground'
+      )} />
+      <div className={cn(
+        'absolute -bottom-px -right-px w-3 h-3 border-b-2 border-r-2 rounded-br-md',
+        isKnownUser ? 'border-primary' : isVisitor ? 'border-amber-500' : 'border-muted-foreground'
+      )} />
 
-      {/* Label nama */}
+      {/* Label nama - warna berbeda: hijau untuk user, kuning untuk tamu, abu untuk tidak dikenal */}
       <div
         className={cn(
           'absolute -top-8 left-0',
           'px-2 py-1',
-          user_id ? 'bg-primary/90 text-primary-foreground' : 'bg-muted/90 text-muted-foreground',
           'text-xs font-medium',
           'rounded-md',
           'shadow-sm',
           'whitespace-nowrap',
-          'max-w-[200px] truncate'
+          'max-w-[200px] truncate',
+          isKnownUser 
+            ? 'bg-primary/90 text-primary-foreground' 
+            : isVisitor 
+              ? 'bg-amber-500/90 text-white' 
+              : 'bg-muted/90 text-muted-foreground'
         )}
       >
         <span>{displayName}</span>

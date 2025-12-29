@@ -52,7 +52,7 @@ export default function MonitorPage() {
           cameraConfig={{
             preferFrontCamera: false, // Tidak memaksa kamera depan
             idealWidth: 1280, // Resolusi lebar ideal
-            idealHeight: 740, // Resolusi tinggi ideal
+            idealHeight: 720, // Resolusi tinggi ideal
           }}
         />
       </div>

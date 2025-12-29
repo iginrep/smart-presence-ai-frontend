@@ -20,6 +20,7 @@ export interface BoundingBox {
  */
 export interface FaceDetection {
   user_id: string | null
+  visitor_id?: string | null
   name?: string
   boundingBox: BoundingBox
   distance?: number
@@ -28,10 +29,11 @@ export interface FaceDetection {
 }
 
 /**
- * Hasil mentah API dari backend
+ * Hasil mentah API dari backend untuk endpoint /face/uploadmany
  */
 export interface ApiDetectionResult {
-  user_id: string | null
+  user_id?: string | null
+  visitor_id?: string | null
   distance: number
   bounding_box: {
     x: number
@@ -42,7 +44,7 @@ export interface ApiDetectionResult {
 }
 
 /**
- * Struktur respons API mentah dari endpoint pengenalan wajah
+ * Struktur respons API mentah dari endpoint /face/uploadmany
  */
 export interface RawApiResponse {
   status: string
